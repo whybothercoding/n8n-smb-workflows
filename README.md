@@ -26,7 +26,24 @@ A curated library of production-ready n8n workflows covering the most common aut
 
 ---
 
-## How to Import
+## Installation
+
+Clone the repository to have all workflows available locally:
+
+```bash
+git clone https://github.com/whybothercoding/n8n-smb-workflows.git
+cd n8n-smb-workflows
+```
+
+Or download a single workflow — navigate to any `workflow.json` on GitHub and click **Raw**, then save the file.
+
+No dependencies to install. No build step. The files are ready to use as-is.
+
+---
+
+## Usage
+
+### How to Import a Workflow
 
 **Step 1 — Copy the workflow JSON**
 Open the workflow folder, then copy the raw contents of `workflow.json`.
