@@ -1,0 +1,187 @@
+{
+  "id": "a1b2c3d4-0007-4abc-8def-000000000007",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Newsletter Subscriber to CRM",
+  "nodes": [
+    {
+      "id": "node-007-webhook",
+      "name": "Beehiiv Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "path": "beehiiv-subscriber",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-007-set",
+      "name": "Map Subscriber Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [460, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-007-001",
+              "name": "email",
+              "value": "={{ $json.data?.email ?? $json.email ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-007-002",
+              "name": "name",
+              "value": "={{ $json.data?.name ?? $json.name ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-007-003",
+              "name": "status",
+              "value": "={{ $json.data?.status ?? $json.status ?? 'active' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-007-004",
+              "name": "source",
+              "value": "beehiiv",
+              "type": "string"
+            },
+            {
+              "id": "assign-007-005",
+              "name": "subscribed_at",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-007-check",
+      "name": "Check If Email Exists",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://YOUR_BASEROW_INSTANCE/api/database/rows/table/YOUR_SUBSCRIBERS_TABLE_ID/?user_field_names=true&filter__field_Email__equal={{ encodeURIComponent($json.email) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Token YOUR_BASEROW_API_TOKEN" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-007-if",
+      "name": "Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-007-001",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true
+      }
+    },
+    {
+      "id": "node-007-update",
+      "name": "Update Subscriber",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [1120, 200],
+      "parameters": {
+        "operation": "update",
+        "tableId": "YOUR_SUBSCRIBERS_TABLE_ID",
+        "id": "={{ $json.results[0].id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Status", "fieldValue": "={{ $('Map Subscriber Fields').item.json.status }}" },
+            { "fieldId": "Last Seen", "fieldValue": "={{ new Date().toISOString() }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "id": "node-007-create",
+      "name": "Create Subscriber",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [1120, 400],
+      "parameters": {
+        "operation": "create",
+        "tableId": "YOUR_SUBSCRIBERS_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Email", "fieldValue": "={{ $('Map Subscriber Fields').item.json.email }}" },
+            { "fieldId": "Name", "fieldValue": "={{ $('Map Subscriber Fields').item.json.name }}" },
+            { "fieldId": "Status", "fieldValue": "={{ $('Map Subscriber Fields').item.json.status }}" },
+            { "fieldId": "Source", "fieldValue": "beehiiv" },
+            { "fieldId": "Subscribed At", "fieldValue": "={{ $('Map Subscriber Fields').item.json.subscribed_at }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Beehiiv Webhook": {
+      "main": [[{ "node": "Map Subscriber Fields", "type": "main", "index": 0 }]]
+    },
+    "Map Subscriber Fields": {
+      "main": [[{ "node": "Check If Email Exists", "type": "main", "index": 0 }]]
+    },
+    "Check If Email Exists": {
+      "main": [[{ "node": "Exists?", "type": "main", "index": 0 }]]
+    },
+    "Exists?": {
+      "main": [
+        [{ "node": "Update Subscriber", "type": "main", "index": 0 }],
+        [{ "node": "Create Subscriber", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0007-4abc-8def-000000000007"
+}

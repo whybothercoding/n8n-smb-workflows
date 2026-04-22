@@ -1,0 +1,150 @@
+{
+  "id": "a1b2c3d4-0004-4abc-8def-000000000004",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Invoice Reminder",
+  "nodes": [
+    {
+      "id": "node-004-schedule",
+      "name": "Daily 9am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-004-baserow",
+      "name": "Get Unpaid Invoices",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "YOUR_INVOICES_TABLE_ID",
+        "returnAll": true,
+        "filters": {
+          "filters": [
+            {
+              "field": "Status",
+              "condition": "equal",
+              "value": "unpaid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "id": "node-004-if",
+      "name": "Is Overdue?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-004-001",
+              "leftValue": "={{ new Date($json.due_date) < new Date() }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true
+      }
+    },
+    {
+      "id": "node-004-email",
+      "name": "Send Reminder Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [900, 200],
+      "parameters": {
+        "fromEmail": "billing@yourcompany.com",
+        "toEmail": "={{ $json.client_email }}",
+        "subject": "=Payment reminder: Invoice #{{ $json.invoice_number }}",
+        "message": "=Hi {{ $json.client_name }},\n\nThis is a friendly reminder that Invoice #{{ $json.invoice_number }} for {{ $json.currency ?? '€' }}{{ $json.amount }} was due on {{ new Date($json.due_date).toLocaleDateString('en-GB') }}.\n\nPlease arrange payment at your earliest convenience. If you have any questions, reply to this email.\n\nThank you,\nYour Company",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "id": "node-004-baserow-update",
+      "name": "Mark Reminder Sent",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [1120, 200],
+      "parameters": {
+        "operation": "update",
+        "tableId": "YOUR_INVOICES_TABLE_ID",
+        "id": "={{ $json.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Reminder Sent", "fieldValue": "={{ new Date().toISOString() }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily 9am": {
+      "main": [[{ "node": "Get Unpaid Invoices", "type": "main", "index": 0 }]]
+    },
+    "Get Unpaid Invoices": {
+      "main": [[{ "node": "Is Overdue?", "type": "main", "index": 0 }]]
+    },
+    "Is Overdue?": {
+      "main": [
+        [{ "node": "Send Reminder Email", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Send Reminder Email": {
+      "main": [[{ "node": "Mark Reminder Sent", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0004-4abc-8def-000000000004"
+}

@@ -1,0 +1,175 @@
+{
+  "id": "a1b2c3d4-0006-4abc-8def-000000000006",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Content Repurpose Pipeline",
+  "nodes": [
+    {
+      "id": "node-006-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "path": "repurpose-content",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-006-fetch",
+      "name": "Fetch Article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "User-Agent", "value": "Mozilla/5.0 (compatible; n8n-bot/1.0)" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-006-code",
+      "name": "Extract Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data;\nconst text = html\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .substring(0, 4000);\n\nreturn [{ json: { text, url: $('Webhook').item.json.url } }];"
+      }
+    },
+    {
+      "id": "node-006-openai",
+      "name": "Generate Content Variations",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a content repurposing specialist. Given article text, produce three outputs in this exact JSON format:\n{\n  \"tweet_thread\": [\"tweet1\", \"tweet2\", \"tweet3\", \"tweet4\", \"tweet5\"],\n  \"linkedin_post\": \"...\",\n  \"newsletter_snippet\": \"...\"\n}\n\nRules:\n- tweet_thread: 5 tweets, each under 280 characters, the first grabs attention, the last includes a call to action. No hashtags.\n- linkedin_post: professional tone, 150–200 words, 3–5 relevant hashtags at end.\n- newsletter_snippet: 80–100 words, written for an email newsletter subscriber, conversational tone, ends with a teaser linking back to the original.\n\nReturn only valid JSON. No markdown code fences."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.text }}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": { "maxTokens": 1500 }
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "id": "node-006-notion",
+      "name": "Save to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [1120, 300],
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_CONTENT_DATABASE_ID",
+          "mode": "id"
+        },
+        "title": "=Repurposed: {{ $('Webhook').item.json.url }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Source URL|url",
+              "urlValue": "={{ $('Webhook').item.json.url }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "draft"
+            },
+            {
+              "key": "Created|date",
+              "date": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "type": "heading_2",
+              "textContent": "Tweet Thread"
+            },
+            {
+              "type": "paragraph",
+              "textContent": "={{ (() => { try { const c = JSON.parse($json.choices[0].message.content); return c.tweet_thread.map((t, i) => (i+1) + '. ' + t).join('\\n\\n'); } catch(e) { return $json.choices[0].message.content; } })() }}"
+            },
+            {
+              "type": "heading_2",
+              "textContent": "LinkedIn Post"
+            },
+            {
+              "type": "paragraph",
+              "textContent": "={{ (() => { try { return JSON.parse($json.choices[0].message.content).linkedin_post; } catch(e) { return ''; } })() }}"
+            },
+            {
+              "type": "heading_2",
+              "textContent": "Newsletter Snippet"
+            },
+            {
+              "type": "paragraph",
+              "textContent": "={{ (() => { try { return JSON.parse($json.choices[0].message.content).newsletter_snippet; } catch(e) { return ''; } })() }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Fetch Article", "type": "main", "index": 0 }]]
+    },
+    "Fetch Article": {
+      "main": [[{ "node": "Extract Text", "type": "main", "index": 0 }]]
+    },
+    "Extract Text": {
+      "main": [[{ "node": "Generate Content Variations", "type": "main", "index": 0 }]]
+    },
+    "Generate Content Variations": {
+      "main": [[{ "node": "Save to Notion", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0006-4abc-8def-000000000006"
+}

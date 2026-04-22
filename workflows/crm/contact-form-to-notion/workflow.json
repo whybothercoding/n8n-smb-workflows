@@ -1,0 +1,103 @@
+{
+  "id": "a1b2c3d4-0002-4abc-8def-000000000002",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Contact Form to Notion",
+  "nodes": [
+    {
+      "id": "node-002-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "path": "contact-form",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-002-notion",
+      "name": "Create Notion Page",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_DATABASE_ID",
+          "mode": "id"
+        },
+        "title": "={{ $json.name }} — {{ new Date().toLocaleDateString('en-GB') }}",
+        "blockUi": {
+          "blockValues": []
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json.email }}"
+            },
+            {
+              "key": "Phone|phone_number",
+              "phoneValue": "={{ $json.phone ?? '' }}"
+            },
+            {
+              "key": "Source|select",
+              "selectValue": "={{ $json.source ?? 'website' }}"
+            },
+            {
+              "key": "Message|rich_text",
+              "textContent": "={{ $json.message ?? '' }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "id": "node-002-slack",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "#contacts",
+        "text": ":mailbox_with_mail: *New contact form submission*\n*Name:* {{ $('Webhook').item.json.name }}\n*Email:* {{ $('Webhook').item.json.email }}\n*Message:* {{ $('Webhook').item.json.message ?? '(no message)' }}\n<{{ $json.url }}|View in Notion>",
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Create Notion Page", "type": "main", "index": 0 }]]
+    },
+    "Create Notion Page": {
+      "main": [[{ "node": "Slack Notification", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0002-4abc-8def-000000000002"
+}

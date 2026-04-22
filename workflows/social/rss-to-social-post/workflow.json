@@ -1,0 +1,116 @@
+{
+  "id": "a1b2c3d4-0005-4abc-8def-000000000005",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "RSS to Social Post",
+  "nodes": [
+    {
+      "id": "node-005-schedule",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-005-rss",
+      "name": "Read RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "parameters": {
+        "url": "https://YOUR_RSS_FEED_URL/feed.xml",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-005-openai",
+      "name": "Write LinkedIn Post",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a professional LinkedIn content writer. Rewrite the article summary below as a LinkedIn post. Use a professional yet conversational tone. Include 3–5 relevant hashtags at the end. Maximum 150 words. Do not use marketing clichés. Start with a strong hook — a question, statistic, or provocative statement."
+            },
+            {
+              "role": "user",
+              "content": "=Article title: {{ $json.title }}\n\nSummary: {{ $json.contentSnippet ?? $json.summary ?? $json.content }}\n\nSource URL: {{ $json.link }}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": { "maxTokens": 300 }
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "id": "node-005-linkedin",
+      "name": "Post to LinkedIn",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer YOUR_LINKEDIN_ACCESS_TOKEN" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "X-Restli-Protocol-Version", "value": "2.0.0" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ \"author\": \"urn:li:person:YOUR_LINKEDIN_PERSON_ID\", \"lifecycleState\": \"PUBLISHED\", \"specificContent\": { \"com.linkedin.ugc.ShareContent\": { \"shareCommentary\": { \"text\": $json.choices[0].message.content }, \"shareMediaCategory\": \"NONE\" } }, \"visibility\": { \"com.linkedin.ugc.MemberNetworkVisibility\": \"PUBLIC\" } }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Every Hour": {
+      "main": [[{ "node": "Read RSS Feed", "type": "main", "index": 0 }]]
+    },
+    "Read RSS Feed": {
+      "main": [[{ "node": "Write LinkedIn Post", "type": "main", "index": 0 }]]
+    },
+    "Write LinkedIn Post": {
+      "main": [[{ "node": "Post to LinkedIn", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0005-4abc-8def-000000000005"
+}

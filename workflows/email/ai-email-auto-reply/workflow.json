@@ -1,0 +1,149 @@
+{
+  "id": "a1b2c3d4-0003-4abc-8def-000000000003",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "AI Email Auto-Reply",
+  "nodes": [
+    {
+      "id": "node-003-gmail-trigger",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "filters": {
+          "readStatus": "unread",
+          "includeSpamTrash": false
+        },
+        "pollTimes": {
+          "item": [{ "mode": "everyMinute" }]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "node-003-openai",
+      "name": "Generate Reply",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a professional business email assistant. Write a concise, polite, and helpful reply to the incoming email. Address the sender by their first name if you can infer it. Sign off as 'The Team'. Keep the reply under 150 words. Do not include a subject line."
+            },
+            {
+              "role": "user",
+              "content": "=From: {{ $json.from.value[0].address }}\nSubject: {{ $json.subject }}\n\n{{ $json.text ?? $json.snippet }}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "id": "node-003-gmail-draft",
+      "name": "Create Draft Reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "=Re: {{ $('Gmail Trigger').item.json.subject }}",
+        "message": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {
+          "threadId": "={{ $('Gmail Trigger').item.json.threadId }}",
+          "toList": "={{ $('Gmail Trigger').item.json.from.value[0].address }}"
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "node-003-notion",
+      "name": "Log to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_EMAIL_LOG_DATABASE_ID",
+          "mode": "id"
+        },
+        "title": "={{ $('Gmail Trigger').item.json.subject }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "From|email",
+              "emailValue": "={{ $('Gmail Trigger').item.json.from.value[0].address }}"
+            },
+            {
+              "key": "Date|date",
+              "date": "={{ new Date().toISOString() }}"
+            },
+            {
+              "key": "Draft Created|checkbox",
+              "checkboxValue": true
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "notionApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [[{ "node": "Generate Reply", "type": "main", "index": 0 }]]
+    },
+    "Generate Reply": {
+      "main": [[{ "node": "Create Draft Reply", "type": "main", "index": 0 }]]
+    },
+    "Create Draft Reply": {
+      "main": [[{ "node": "Log to Notion", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0003-4abc-8def-000000000003"
+}

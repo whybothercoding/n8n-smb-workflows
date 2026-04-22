@@ -1,0 +1,151 @@
+{
+  "id": "a1b2c3d4-0008-4abc-8def-000000000008",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Abandoned Lead Follow-up",
+  "nodes": [
+    {
+      "id": "node-008-schedule",
+      "name": "Daily 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1-5"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-008-baserow",
+      "name": "Get Stale Leads",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "YOUR_LEADS_TABLE_ID",
+        "returnAll": true,
+        "filters": {
+          "filters": [
+            {
+              "field": "Status",
+              "condition": "equal",
+              "value": "lead"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "id": "node-008-if",
+      "name": "Not Contacted in 3 Days?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-008-001",
+              "leftValue": "={{ $json.last_contacted ? new Date($json.last_contacted) < new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) : true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true
+      }
+    },
+    {
+      "id": "node-008-email",
+      "name": "Send Follow-up Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [900, 200],
+      "parameters": {
+        "fromEmail": "hello@yourcompany.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Quick follow-up from Your Company",
+        "message": "=Hi {{ $json.name }},\n\nI wanted to follow up — did you have a chance to think about what you reached out about?\n\nI'd love to find a time to chat and see if we can help. Even a 15-minute call could be useful.\n\nIf you're not interested, no worries at all — just let me know and I won't follow up again.\n\nBest,\nYour Name\nYour Company",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "id": "node-008-update",
+      "name": "Update Last Contacted",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [1120, 200],
+      "parameters": {
+        "operation": "update",
+        "tableId": "YOUR_LEADS_TABLE_ID",
+        "id": "={{ $json.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "last_contacted", "fieldValue": "={{ new Date().toISOString() }}" },
+            { "fieldId": "follow_up_count", "fieldValue": "={{ ($json.follow_up_count ?? 0) + 1 }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily 8am": {
+      "main": [[{ "node": "Get Stale Leads", "type": "main", "index": 0 }]]
+    },
+    "Get Stale Leads": {
+      "main": [[{ "node": "Not Contacted in 3 Days?", "type": "main", "index": 0 }]]
+    },
+    "Not Contacted in 3 Days?": {
+      "main": [
+        [{ "node": "Send Follow-up Email", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Send Follow-up Email": {
+      "main": [[{ "node": "Update Last Contacted", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0008-4abc-8def-000000000008"
+}

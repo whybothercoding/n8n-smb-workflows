@@ -1,0 +1,158 @@
+{
+  "id": "a1b2c3d4-0009-4abc-8def-000000000009",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Weekly Business Digest",
+  "nodes": [
+    {
+      "id": "node-009-schedule",
+      "name": "Monday 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-009-leads",
+      "name": "Get New Leads",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [460, 200],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "YOUR_LEADS_TABLE_ID",
+        "returnAll": true,
+        "filters": {
+          "filters": [
+            {
+              "field": "Created At",
+              "condition": "date_after",
+              "value": "={{ new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "id": "node-009-invoices",
+      "name": "Get Invoices",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [460, 400],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "YOUR_INVOICES_TABLE_ID",
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "id": "node-009-code",
+      "name": "Aggregate Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\nconst leads = allItems.filter(i => i.json.Status !== undefined && i.json.invoice_number === undefined);\nconst invoices = allItems.filter(i => i.json.invoice_number !== undefined);\n\nconst newLeadsCount = leads.length;\nconst newLeadsList = leads.slice(0, 5).map(l => `<li>${l.json.name ?? 'Unknown'} (${l.json.email ?? ''})</li>`).join('');\n\nconst paidInvoices = invoices.filter(i => i.json.Status === 'paid');\nconst unpaidInvoices = invoices.filter(i => i.json.Status === 'unpaid');\nconst totalRevenue = paidInvoices.reduce((sum, i) => sum + (parseFloat(i.json.amount) || 0), 0);\nconst totalOutstanding = unpaidInvoices.reduce((sum, i) => sum + (parseFloat(i.json.amount) || 0), 0);\n\nconst weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB');\nconst weekEnd = new Date().toLocaleDateString('en-GB');\n\nreturn [{\n  json: {\n    weekStart,\n    weekEnd,\n    newLeadsCount,\n    newLeadsList: newLeadsList || '<li>No new leads this week</li>',\n    paidCount: paidInvoices.length,\n    unpaidCount: unpaidInvoices.length,\n    totalRevenue: totalRevenue.toFixed(2),\n    totalOutstanding: totalOutstanding.toFixed(2)\n  }\n}];"
+      }
+    },
+    {
+      "id": "node-009-set",
+      "name": "Build HTML Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [900, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-009-001",
+              "name": "html",
+              "value": "=<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333\"><h1 style=\"color:#1a1a1a\">Weekly Business Digest</h1><p style=\"color:#666\">{{ $json.weekStart }} — {{ $json.weekEnd }}</p><h2>Leads</h2><table style=\"width:100%;border-collapse:collapse\"><tr style=\"background:#f5f5f5\"><td style=\"padding:8px\"><strong>New leads this week</strong></td><td style=\"padding:8px;text-align:right\">{{ $json.newLeadsCount }}</td></tr></table><ul style=\"margin-top:8px\">{{ $json.newLeadsList }}</ul><h2>Revenue</h2><table style=\"width:100%;border-collapse:collapse\"><tr style=\"background:#f5f5f5\"><td style=\"padding:8px\"><strong>Paid invoices</strong></td><td style=\"padding:8px;text-align:right\">{{ $json.paidCount }}</td></tr><tr><td style=\"padding:8px\"><strong>Total collected</strong></td><td style=\"padding:8px;text-align:right\">€{{ $json.totalRevenue }}</td></tr><tr style=\"background:#fff3cd\"><td style=\"padding:8px\"><strong>Outstanding (unpaid)</strong></td><td style=\"padding:8px;text-align:right\">€{{ $json.totalOutstanding }} ({{ $json.unpaidCount }} invoices)</td></tr></table><p style=\"color:#999;font-size:12px;margin-top:30px\">Sent automatically by n8n every Monday at 8am.</p></body></html>",
+              "type": "string"
+            },
+            {
+              "id": "assign-009-002",
+              "name": "subject",
+              "value": "=Weekly Digest: {{ $json.newLeadsCount }} new leads | €{{ $json.totalRevenue }} collected",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-009-email",
+      "name": "Email Digest to Owner",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1120, 300],
+      "parameters": {
+        "fromEmail": "digest@yourcompany.com",
+        "toEmail": "owner@yourcompany.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Monday 8am": {
+      "main": [
+        [
+          { "node": "Get New Leads", "type": "main", "index": 0 },
+          { "node": "Get Invoices", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get New Leads": {
+      "main": [[{ "node": "Aggregate Stats", "type": "main", "index": 0 }]]
+    },
+    "Get Invoices": {
+      "main": [[{ "node": "Aggregate Stats", "type": "main", "index": 0 }]]
+    },
+    "Aggregate Stats": {
+      "main": [[{ "node": "Build HTML Email", "type": "main", "index": 0 }]]
+    },
+    "Build HTML Email": {
+      "main": [[{ "node": "Email Digest to Owner", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0009-4abc-8def-000000000009"
+}

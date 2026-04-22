@@ -1,0 +1,150 @@
+{
+  "id": "a1b2c3d4-0010-4abc-8def-000000000010",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Support Ticket to Slack",
+  "nodes": [
+    {
+      "id": "node-010-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {
+        "path": "support-ticket",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-010-baserow",
+      "name": "Create Ticket",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "parameters": {
+        "operation": "create",
+        "tableId": "YOUR_TICKETS_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Name", "fieldValue": "={{ $json.name }}" },
+            { "fieldId": "Email", "fieldValue": "={{ $json.email }}" },
+            { "fieldId": "Subject", "fieldValue": "={{ $json.subject ?? 'Support request' }}" },
+            { "fieldId": "Message", "fieldValue": "={{ $json.message }}" },
+            { "fieldId": "Status", "fieldValue": "open" },
+            { "fieldId": "Created At", "fieldValue": "={{ new Date().toISOString() }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    },
+    {
+      "id": "node-010-slack",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "#support",
+        "text": ":tickets: *New support ticket #{{ $json.id }}*\n*From:* {{ $('Webhook').item.json.name }} ({{ $('Webhook').item.json.email }})\n*Subject:* {{ $('Webhook').item.json.subject ?? 'Support request' }}\n*Message:* {{ $('Webhook').item.json.message }}",
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "id": "node-010-openai",
+      "name": "Generate Suggested Reply",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a friendly and helpful customer support agent. Write a concise, professional reply to the customer's support message. Address them by name. Acknowledge their issue, provide a brief helpful response or next step, and sign off as 'The Support Team'. Keep it under 100 words."
+            },
+            {
+              "role": "user",
+              "content": "=Customer name: {{ $('Webhook').item.json.name }}\nSubject: {{ $('Webhook').item.json.subject ?? 'Support request' }}\nMessage: {{ $('Webhook').item.json.message }}"
+            }
+          ]
+        },
+        "simplify": true,
+        "options": { "maxTokens": 200 }
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "id": "node-010-update",
+      "name": "Update Ticket with Suggestion",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
+      "position": [1120, 300],
+      "parameters": {
+        "operation": "update",
+        "tableId": "YOUR_TICKETS_TABLE_ID",
+        "id": "={{ $('Create Ticket').item.json.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "AI Suggested Reply", "fieldValue": "={{ $json.choices[0].message.content }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "baserowApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Create Ticket", "type": "main", "index": 0 }]]
+    },
+    "Create Ticket": {
+      "main": [[{ "node": "Post to Slack", "type": "main", "index": 0 }]]
+    },
+    "Post to Slack": {
+      "main": [[{ "node": "Generate Suggested Reply", "type": "main", "index": 0 }]]
+    },
+    "Generate Suggested Reply": {
+      "main": [[{ "node": "Update Ticket with Suggestion", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "versionId": "v1b2c3d4-0010-4abc-8def-000000000010"
+}
