@@ -1,0 +1,78 @@
+{
+  "id": "a1b2c3d4-0011-4abc-8def-000000000011",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Error Handler",
+  "nodes": [
+    {
+      "id": "node-011-trigger",
+      "name": "Workflow Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {}
+    },
+    {
+      "id": "node-011-set",
+      "name": "Format Error Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [460, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-011-001",
+              "name": "subject",
+              "value": "=⚠️ n8n workflow failed: {{ $json.workflow.name }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-011-002",
+              "name": "body",
+              "value": "=Workflow: {{ $json.workflow.name }}\nExecution ID: {{ $json.execution.id }}\nError: {{ $json.execution.error.message }}\nNode: {{ $json.execution.error.node?.name ?? 'unknown' }}\nStarted: {{ new Date($json.execution.startedAt).toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-011-email",
+      "name": "Send Error Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "fromEmail": "n8n-alerts@yourcompany.com",
+        "toEmail": "owner@yourcompany.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Workflow Error Trigger": {
+      "main": [[{ "node": "Format Error Message", "type": "main", "index": 0 }]]
+    },
+    "Format Error Message": {
+      "main": [[{ "node": "Send Error Alert", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": ["utilities"],
+  "versionId": "v1b2c3d4-0011-4abc-8def-000000000011"
+}

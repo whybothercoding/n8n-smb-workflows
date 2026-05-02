@@ -23,6 +23,7 @@ A curated library of production-ready n8n workflows covering the most common aut
 | 8 | [Abandoned Lead Follow-up](workflows/lead-gen/abandoned-lead-followup/) | Lead Gen | Daily stale-lead check → follow-up email + Baserow update |
 | 9 | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) | Reporting | Monday summary of Baserow stats → HTML digest email |
 | 10 | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) | Reporting | Contact form → Baserow ticket + Slack alert + AI suggested reply |
+| 11 | [Error Handler](workflows/utilities/error-handler/) | Utilities | Centralized error alert — routes any workflow failure to an email notification |
 
 ---
 

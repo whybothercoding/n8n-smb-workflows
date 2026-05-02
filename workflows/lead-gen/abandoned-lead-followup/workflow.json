@@ -144,7 +144,7 @@
   },
   "pinData": {},
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
   "tags": [],
   "versionId": "v1b2c3d4-0008-4abc-8def-000000000008"
