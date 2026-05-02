@@ -61,7 +61,6 @@
             }
           ]
         },
-        "simplify": true,
         "options": { "maxTokens": 300 }
       },
       "credentials": {

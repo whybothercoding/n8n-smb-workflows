@@ -93,7 +93,6 @@
             }
           ]
         },
-        "simplify": true,
         "options": { "maxTokens": 200 }
       },
       "credentials": {
