@@ -9,6 +9,21 @@ A curated library of production-ready n8n workflows covering the most common aut
 
 ---
 
+## How Each Workflow Works
+
+Every workflow follows the same import-and-activate pattern:
+
+```
+Trigger (Webhook · Schedule · Gmail poll)
+  └─▶  Normalize / Filter
+          └─▶  Action (CRM · Email · Social · AI)
+                  └─▶  Log / Confirm / Alert
+```
+
+All workflows ship as `active: false`. Import → connect credentials → activate.
+
+---
+
 ## What's Inside
 
 | # | Workflow | Category | Description |
@@ -24,6 +39,23 @@ A curated library of production-ready n8n workflows covering the most common aut
 | 9 | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) | Reporting | Monday summary of Baserow stats → HTML digest email |
 | 10 | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) | Reporting | Contact form → Baserow ticket + Slack alert + AI suggested reply |
 | 11 | [Error Handler](workflows/utilities/error-handler/) | Utilities | Centralized error alert — routes any workflow failure to an email notification |
+
+---
+
+## Which Workflow Do I Need?
+
+| If you want to… | Use |
+|---|---|
+| Capture form leads into a CRM | [Lead Capture to Baserow](workflows/crm/lead-capture-to-baserow/) or [Contact Form to Notion](workflows/crm/contact-form-to-notion/) |
+| Auto-draft replies to inbound emails | [AI Email Auto-Reply](workflows/email/ai-email-auto-reply/) |
+| Chase unpaid invoices automatically | [Invoice Reminder](workflows/email/invoice-reminder/) |
+| Turn blog posts into LinkedIn content | [RSS to Social Post](workflows/social/rss-to-social-post/) |
+| Repurpose any article into 3 content formats | [Content Repurpose Pipeline](workflows/social/content-repurpose-pipeline/) |
+| Sync newsletter subscribers to your CRM | [Newsletter Subscriber to CRM](workflows/lead-gen/newsletter-subscriber-to-crm/) |
+| Follow up with leads that went cold | [Abandoned Lead Follow-up](workflows/lead-gen/abandoned-lead-followup/) |
+| Get a weekly business numbers email | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) |
+| Route support tickets to Slack + AI draft replies | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) |
+| Get alerted when any workflow fails | [Error Handler](workflows/utilities/error-handler/) |
 
 ---
 
@@ -63,6 +95,12 @@ See [docs/how-to-import.md](docs/how-to-import.md) for a detailed walkthrough.
 
 - A running n8n instance (self-hosted or cloud). See [n8n docs](https://docs.n8n.io/hosting/) for setup.
 - Credentials for the services each workflow uses. See [docs/credentials-setup.md](docs/credentials-setup.md).
+
+---
+
+### Validating workflows before contributing
+
+Run `bash validate.sh` from the repo root to check all workflow files meet the repository requirements (valid JSON, required fields, correct placeholders, error routing wired).
 
 ---
 
