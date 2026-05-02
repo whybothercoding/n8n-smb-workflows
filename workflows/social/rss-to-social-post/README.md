@@ -17,6 +17,7 @@ Turn your industry news feed or blog into a steady stream of LinkedIn content �
 |------|------|---------|
 | Every Hour | `n8n-nodes-base.scheduleTrigger` | Triggers the workflow every 60 minutes |
 | Read RSS Feed | `n8n-nodes-base.rssFeedRead` | Fetches items from your RSS feed URL |
+| Published in Last Hour? | `n8n-nodes-base.if` | Filters to items with isoDate in the past 60 minutes; items without isoDate pass through |
 | Write LinkedIn Post | `n8n-nodes-base.openAi` | Rewrites each item as a 150-word LinkedIn post |
 | Post to LinkedIn | `n8n-nodes-base.httpRequest` | Posts to LinkedIn UGC Posts API |
 
@@ -24,13 +25,12 @@ Turn your industry news feed or blog into a steady stream of LinkedIn content �
 
 After importing:
 
-1. **Read RSS Feed** — replace `YOUR_RSS_FEED_URL` with your feed URL (e.g. `https://techcrunch.com/feed/`)
-2. **Post to LinkedIn** — replace `YOUR_LINKEDIN_ACCESS_TOKEN` in the Authorization header. Get a token via the [LinkedIn Developer Portal](https://developer.linkedin.com/) — you need an app with `w_member_social` permission.
+1. **Read RSS Feed** — replace `YOUR_RSS_FEED_URL` with your feed URL (e.g. `https://techcrunch.com/feed/`). The **Published in Last Hour?** IF node automatically filters out older items on each run — no duplicate posts.
+2. **Post to LinkedIn** — replace `REPLACE_WITH_YOUR_LINKEDIN_ACCESS_TOKEN` in the Authorization header. Get a token via the [LinkedIn Developer Portal](https://developer.linkedin.com/) — you need an app with `w_member_social` permission.
 3. **Post to LinkedIn** — replace `YOUR_LINKEDIN_PERSON_ID` with your LinkedIn person URN (find it by calling `https://api.linkedin.com/v2/me` with your token)
 4. **Write LinkedIn Post** — edit the system prompt to match your brand voice
 5. Connect OpenAI credentials
 
-**Note on volume:** A busy RSS feed may generate many posts per hour. Add an IF node after the RSS step to filter only items published in the last hour using `{{ new Date($json.isoDate) > new Date(Date.now() - 3600000) }}`.
 
 ## Example
 

@@ -35,11 +35,33 @@
       }
     },
     {
+      "id": "node-005-if",
+      "name": "Published in Last Hour?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "cond-005-001",
+              "leftValue": "={{ $json.isoDate ? new Date($json.isoDate) > new Date(Date.now() - 3600000) : true }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true
+      }
+    },
+    {
       "id": "node-005-openai",
       "name": "Write LinkedIn Post",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 1,
-      "position": [680, 300],
+      "position": [900, 300],
       "parameters": {
         "resource": "text",
         "operation": "message",
@@ -75,14 +97,14 @@
       "name": "Post to LinkedIn",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [900, 300],
+      "position": [1120, 300],
       "parameters": {
         "method": "POST",
         "url": "https://api.linkedin.com/v2/ugcPosts",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "Bearer YOUR_LINKEDIN_ACCESS_TOKEN" },
+            { "name": "Authorization", "value": "Bearer REPLACE_WITH_YOUR_LINKEDIN_ACCESS_TOKEN" },
             { "name": "Content-Type", "value": "application/json" },
             { "name": "X-Restli-Protocol-Version", "value": "2.0.0" }
           ]
@@ -100,7 +122,13 @@
       "main": [[{ "node": "Read RSS Feed", "type": "main", "index": 0 }]]
     },
     "Read RSS Feed": {
-      "main": [[{ "node": "Write LinkedIn Post", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Published in Last Hour?", "type": "main", "index": 0 }]]
+    },
+    "Published in Last Hour?": {
+      "main": [
+        [{ "node": "Write LinkedIn Post", "type": "main", "index": 0 }],
+        []
+      ]
     },
     "Write LinkedIn Post": {
       "main": [[{ "node": "Post to LinkedIn", "type": "main", "index": 0 }]]
