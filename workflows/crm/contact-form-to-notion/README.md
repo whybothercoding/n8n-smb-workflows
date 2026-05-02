@@ -16,6 +16,7 @@ Keep your entire contact history inside Notion while getting instant Slack alert
 | Node | Type | Purpose |
 |------|------|---------|
 | Webhook | `n8n-nodes-base.webhook` | Receives POST from the contact form |
+| Normalize Fields | `n8n-nodes-base.set` | Maps name/full_name and phone/telephone aliases; defaults source to 'website' |
 | Create Notion Page | `n8n-nodes-base.notion` | Creates a page in your Notion contacts database |
 | Slack Notification | `n8n-nodes-base.slack` | Posts a summary card to a Slack channel |
 
@@ -23,6 +24,7 @@ Keep your entire contact history inside Notion while getting instant Slack alert
 
 After importing:
 
+0. **Normalize Fields** — if your form sends different field names (e.g. `full_name` instead of `name`), update the fallback aliases in this Set node.
 1. **Webhook node** — copy the webhook URL and point your form to it
 2. **Create Notion Page** — replace `YOUR_NOTION_DATABASE_ID` with your database ID (from the Notion URL: `notion.so/<database_id>?v=...`)
 3. **Create Notion Page** — ensure your Notion database has properties named `Email`, `Phone`, `Source`, `Message` (types: email, phone_number, select, rich_text respectively). Add the Notion integration to the database via the database's **Connections** settings.

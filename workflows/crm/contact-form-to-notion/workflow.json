@@ -20,11 +20,30 @@
       }
     },
     {
+      "id": "node-002-set",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [460, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "assign-002-001", "name": "name", "value": "={{ $json.name ?? $json.full_name ?? '' }}", "type": "string" },
+            { "id": "assign-002-002", "name": "email", "value": "={{ $json.email ?? '' }}", "type": "string" },
+            { "id": "assign-002-003", "name": "phone", "value": "={{ $json.phone ?? $json.telephone ?? '' }}", "type": "string" },
+            { "id": "assign-002-004", "name": "source", "value": "={{ $json.source ?? 'website' }}", "type": "string" },
+            { "id": "assign-002-005", "name": "message", "value": "={{ $json.message ?? '' }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
       "id": "node-002-notion",
       "name": "Create Notion Page",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2,
-      "position": [460, 300],
+      "position": [680, 300],
       "parameters": {
         "resource": "databasePage",
         "operation": "create",
@@ -70,12 +89,12 @@
       "name": "Slack Notification",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2,
-      "position": [680, 300],
+      "position": [900, 300],
       "parameters": {
         "resource": "message",
         "operation": "post",
         "channel": "#contacts",
-        "text": ":mailbox_with_mail: *New contact form submission*\n*Name:* {{ $('Webhook').item.json.name }}\n*Email:* {{ $('Webhook').item.json.email }}\n*Message:* {{ $('Webhook').item.json.message ?? '(no message)' }}\n<{{ $json.url }}|View in Notion>",
+        "text": ":mailbox_with_mail: *New contact form submission*\n*Name:* {{ $('Normalize Fields').item.json.name }}\n*Email:* {{ $('Normalize Fields').item.json.email }}\n*Message:* {{ $('Normalize Fields').item.json.message || '(no message)' }}\n<{{ $json.url }}|View in Notion>",
         "otherOptions": {}
       },
       "credentials": {
@@ -88,6 +107,9 @@
   ],
   "connections": {
     "Webhook": {
+      "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
+    },
+    "Normalize Fields": {
       "main": [[{ "node": "Create Notion Page", "type": "main", "index": 0 }]]
     },
     "Create Notion Page": {
