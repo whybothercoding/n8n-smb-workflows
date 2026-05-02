@@ -75,7 +75,7 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "Token YOUR_BASEROW_API_TOKEN" }
+            { "name": "Authorization", "value": "Token REPLACE_WITH_YOUR_BASEROW_API_TOKEN" }
           ]
         },
         "options": {}

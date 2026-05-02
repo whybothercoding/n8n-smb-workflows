@@ -26,7 +26,7 @@ Keep your newsletter subscriber list and CRM in sync automatically. Every time s
 After importing:
 
 1. **Beehiiv Webhook** — copy the webhook URL; add it in Beehiiv under **Settings → Integrations → Webhooks** for the `subscriber.created` and `subscriber.updated` events
-2. **Check If Email Exists** — replace `YOUR_BASEROW_INSTANCE` (e.g. `baserow.yourdomain.com`), `YOUR_SUBSCRIBERS_TABLE_ID`, and `YOUR_BASEROW_API_TOKEN`
+2. **Check If Email Exists** — replace `YOUR_BASEROW_INSTANCE` (e.g. `baserow.yourdomain.com`), `YOUR_SUBSCRIBERS_TABLE_ID`, and `REPLACE_WITH_YOUR_BASEROW_API_TOKEN`
 3. **Update Subscriber + Create Subscriber** — replace `YOUR_SUBSCRIBERS_TABLE_ID`; ensure your Baserow table has columns: `Email`, `Name`, `Status`, `Source`, `Subscribed At`, `Last Seen`
 4. Connect Baserow credentials on both Baserow nodes
 
