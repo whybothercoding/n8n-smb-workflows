@@ -19,7 +19,7 @@ docs/
   credentials-setup.md
 ```
 
-**Categories:** `crm`, `email`, `social`, `lead-gen`, `reporting`. Propose a new one in the PR description if none fits.
+**Categories:** `crm`, `email`, `social`, `lead-gen`, `reporting`, `utilities`. Propose a new one in the PR description if none fits.
 
 ## Adding or Editing a Workflow
 
@@ -27,8 +27,10 @@ docs/
 
 - `active: false` — always ship as inactive
 - `settings.executionOrder: "v1"`
+- `settings.errorWorkflow: "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID"` — required on all non-utility workflows (the Error Handler utility uses `""` to avoid a circular loop)
 - `id` — unique UUID
-- Every credential reference must use the exact placeholder: `"REPLACE_WITH_YOUR_CREDENTIAL_ID"`
+- Every credential `id` field must use: `"REPLACE_WITH_YOUR_CREDENTIAL_ID"`
+- Every raw API token in HTTP Request header values must use a `REPLACE_WITH_YOUR_...` prefixed placeholder (e.g. `"Token REPLACE_WITH_YOUR_BASEROW_API_TOKEN"`)
 - Node `id` values must be unique within the file
 - Export via n8n: **Workflow menu → Download**, then clean up any instance-specific data (clear `meta.instanceId`)
 
@@ -55,9 +57,19 @@ When adding a workflow, append a row to the "What's Inside" table in `README.md`
 - Title: `Add: <workflow-slug>`
 - One workflow per PR
 
+## Validation
+
+Run before committing any workflow change:
+
+```bash
+bash validate.sh
+```
+
+Checks all `workflow.json` files for: valid JSON, required fields, `active: false`, `executionOrder: v1`, `errorWorkflow` present, no raw API tokens in headers. Must exit 0 before a PR is opened.
+
 ## Credential Placeholder Pattern
 
-This is the most important constraint for contributors. Any node that uses credentials must have the credential ID set to `"REPLACE_WITH_YOUR_CREDENTIAL_ID"` so importers know to reconnect. The credential `name` field can be descriptive (e.g. `"Baserow account"`), but the `id` must always be the placeholder string.
+Any node that uses credentials must have the credential `id` set to `"REPLACE_WITH_YOUR_CREDENTIAL_ID"`. The `name` field can be descriptive (e.g. `"Baserow account"`). For HTTP Request nodes that pass tokens in headers, the header value must also use a `REPLACE_WITH_YOUR_...` prefixed string — not a bare placeholder like `YOUR_TOKEN`. Both patterns are checked by `validate.sh`.
 
 ## Workflow Design Conventions (for new workflows)
 
