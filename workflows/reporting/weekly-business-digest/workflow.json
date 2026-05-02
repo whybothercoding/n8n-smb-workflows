@@ -71,13 +71,43 @@
       }
     },
     {
+      "id": "node-009-tag-lead",
+      "name": "Tag as Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [680, 200],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "assign-009-tag-001", "name": "data_type", "value": "lead", "type": "string" }
+          ]
+        },
+        "options": { "includeOtherFields": true }
+      }
+    },
+    {
+      "id": "node-009-tag-invoice",
+      "name": "Tag as Invoice",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [680, 400],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "assign-009-tag-002", "name": "data_type", "value": "invoice", "type": "string" }
+          ]
+        },
+        "options": { "includeOtherFields": true }
+      }
+    },
+    {
       "id": "node-009-code",
       "name": "Aggregate Stats",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 300],
+      "position": [900, 300],
       "parameters": {
-        "jsCode": "const allItems = $input.all();\n\nconst leads = allItems.filter(i => i.json.Status !== undefined && i.json.invoice_number === undefined);\nconst invoices = allItems.filter(i => i.json.invoice_number !== undefined);\n\nconst newLeadsCount = leads.length;\nconst newLeadsList = leads.slice(0, 5).map(l => `<li>${l.json.name ?? 'Unknown'} (${l.json.email ?? ''})</li>`).join('');\n\nconst paidInvoices = invoices.filter(i => i.json.Status === 'paid');\nconst unpaidInvoices = invoices.filter(i => i.json.Status === 'unpaid');\nconst totalRevenue = paidInvoices.reduce((sum, i) => sum + (parseFloat(i.json.amount) || 0), 0);\nconst totalOutstanding = unpaidInvoices.reduce((sum, i) => sum + (parseFloat(i.json.amount) || 0), 0);\n\nconst weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB');\nconst weekEnd = new Date().toLocaleDateString('en-GB');\n\nreturn [{\n  json: {\n    weekStart,\n    weekEnd,\n    newLeadsCount,\n    newLeadsList: newLeadsList || '<li>No new leads this week</li>',\n    paidCount: paidInvoices.length,\n    unpaidCount: unpaidInvoices.length,\n    totalRevenue: totalRevenue.toFixed(2),\n    totalOutstanding: totalOutstanding.toFixed(2)\n  }\n}];"
+        "jsCode": "const allItems = $input.all();\n\nconst leads = allItems.filter(i => i.json.data_type === 'lead');\nconst invoices = allItems.filter(i => i.json.data_type === 'invoice');\n\nconst newLeadsCount = leads.length;\nconst newLeadsList = leads.slice(0, 5).map(l => `<li>${l.json.name ?? 'Unknown'} (${l.json.email ?? ''})</li>`).join('');\n\nconst paidInvoices = invoices.filter(i => i.json.Status === 'paid');\nconst unpaidInvoices = invoices.filter(i => i.json.Status === 'unpaid');\nconst totalRevenue = paidInvoices.reduce((sum, i) => sum + (parseFloat(i.json.amount) || 0), 0);\nconst totalOutstanding = unpaidInvoices.reduce((sum, i) => sum + (parseFloat(i.json.amount) || 0), 0);\n\nconst weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB');\nconst weekEnd = new Date().toLocaleDateString('en-GB');\n\nreturn [{\n  json: {\n    weekStart,\n    weekEnd,\n    newLeadsCount,\n    newLeadsList: newLeadsList || '<li>No new leads this week</li>',\n    paidCount: paidInvoices.length,\n    unpaidCount: unpaidInvoices.length,\n    totalRevenue: totalRevenue.toFixed(2),\n    totalOutstanding: totalOutstanding.toFixed(2)\n  }\n}];"
       }
     },
     {
@@ -85,7 +115,7 @@
       "name": "Build HTML Email",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
-      "position": [900, 300],
+      "position": [1120, 300],
       "parameters": {
         "assignments": {
           "assignments": [
@@ -111,7 +141,7 @@
       "name": "Email Digest to Owner",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
-      "position": [1120, 300],
+      "position": [1340, 300],
       "parameters": {
         "fromEmail": "digest@yourcompany.com",
         "toEmail": "owner@yourcompany.com",
@@ -129,17 +159,21 @@
   ],
   "connections": {
     "Monday 8am": {
-      "main": [
-        [
-          { "node": "Get New Leads", "type": "main", "index": 0 },
-          { "node": "Get Invoices", "type": "main", "index": 0 }
-        ]
-      ]
+      "main": [[
+        { "node": "Get New Leads", "type": "main", "index": 0 },
+        { "node": "Get Invoices", "type": "main", "index": 0 }
+      ]]
     },
     "Get New Leads": {
-      "main": [[{ "node": "Aggregate Stats", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Tag as Lead", "type": "main", "index": 0 }]]
     },
     "Get Invoices": {
+      "main": [[{ "node": "Tag as Invoice", "type": "main", "index": 0 }]]
+    },
+    "Tag as Lead": {
+      "main": [[{ "node": "Aggregate Stats", "type": "main", "index": 0 }]]
+    },
+    "Tag as Invoice": {
       "main": [[{ "node": "Aggregate Stats", "type": "main", "index": 0 }]]
     },
     "Aggregate Stats": {

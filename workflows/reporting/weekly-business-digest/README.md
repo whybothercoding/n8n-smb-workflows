@@ -18,6 +18,8 @@ Start every Monday with a clear picture of last week. This workflow automaticall
 | Monday 8am | `n8n-nodes-base.scheduleTrigger` | Triggers every Monday at 08:00 |
 | Get New Leads | `n8n-nodes-base.baserow` | Fetches leads created in the last 7 days |
 | Get Invoices | `n8n-nodes-base.baserow` | Fetches all invoice rows |
+| Tag as Lead | `n8n-nodes-base.set` | Stamps data_type: "lead" on every lead row before merging |
+| Tag as Invoice | `n8n-nodes-base.set` | Stamps data_type: "invoice" on every invoice row before merging |
 | Aggregate Stats | `n8n-nodes-base.code` | Computes counts, total revenue, and outstanding amount |
 | Build HTML Email | `n8n-nodes-base.set` | Assembles the HTML email body and subject line |
 | Email Digest to Owner | `n8n-nodes-base.emailSend` | Sends the digest to the owner's email address |
@@ -28,7 +30,7 @@ After importing:
 
 1. **Get New Leads** — replace `YOUR_LEADS_TABLE_ID`; ensure your leads table has a `Created At` date field
 2. **Get Invoices** — replace `YOUR_INVOICES_TABLE_ID`; ensure your invoices table has `Status` (values `paid`/`unpaid`) and `amount` (number) fields
-3. **Aggregate Stats** — the Code node distinguishes leads from invoices by the presence of `invoice_number`. If your column name differs, update the `i.json.invoice_number === undefined` check
+3. **Aggregate Stats** — the Code node separates leads from invoices using the data_type field stamped by the Tag nodes. No column name dependency.
 4. **Email Digest to Owner** — update `fromEmail` and `toEmail` in the Email node parameters
 5. Connect credentials: Baserow account (both Baserow nodes), SMTP account
 
