@@ -77,3 +77,33 @@ Any node that uses credentials must have the credential `id` set to `"REPLACE_WI
 - Use a `Set` node immediately after the trigger to normalise field names before any logic
 - Schedule-triggered flows: default to a sensible cron (e.g. Monday 08:00) — importers will adjust
 - Keep flows linear where possible; branch only when the use case genuinely requires it
+- **OpenAI nodes:** always set `"simplify": false` at the parameter level. The node defaults to `simplify: true`, which strips the `choices[]` wrapper — any downstream expression referencing `$json.choices[0].message.content` will silently return `undefined` without this flag.
+
+## Node ID and Field Naming Conventions
+
+Follow the established patterns so the repo stays consistent:
+
+- **Node IDs:** `node-{workflow-number}-{purpose}` — e.g. `node-003-openai`, `node-007-if`
+- **Assignment IDs** (inside Set nodes): `assign-{workflow-number}-{sequence}` — e.g. `assign-003-001`
+- **Condition IDs** (inside IF nodes): `cond-{workflow-number}-{sequence}` — e.g. `cond-004-001`
+- **Workflow number** is the two-digit sequence from the `id` field (e.g. `0003` → `003`)
+
+## Required JSON Envelope Fields
+
+Every `workflow.json` must include these top-level fields (beyond nodes/connections):
+
+```json
+{
+  "id": "<uuid>",
+  "meta": { "instanceId": "", "templateCredsSetupCompleted": true },
+  "name": "...",
+  "pinData": {},
+  "staticData": null,
+  "tags": ["<category>"],
+  "active": false,
+  "settings": { "executionOrder": "v1", "errorWorkflow": "..." },
+  "versionId": "<uuid>"
+}
+```
+
+`instanceId` must be an empty string (never a real instance ID). The `tags` array should contain the workflow's category slug.
