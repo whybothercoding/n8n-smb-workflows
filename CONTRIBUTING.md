@@ -15,7 +15,7 @@ cd n8n-smb-workflows
 
 **Step 2 — Create your workflow folder**
 
-Pick the right category (`crm`, `email`, `social`, `lead-gen`, `reporting`) or propose a new one in the PR description.
+Pick the right category (`crm`, `email`, `social`, `lead-gen`, `reporting`, `utilities`) or propose a new one in the PR description.
 
 ```bash
 mkdir -p workflows/<category>/<your-workflow-name>
@@ -49,6 +49,7 @@ Export your workflow from n8n (**Workflow menu → Download**). The file must in
 - `connections` — object mapping node outputs to inputs
 - `active: false` — always ship as inactive
 - `settings.executionOrder: "v1"`
+- `settings.errorWorkflow: "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID"` — required on all non-utility workflows
 - `versionId` — UUID
 
 Credential IDs in `credentials` blocks must use the placeholder string `"REPLACE_WITH_YOUR_CREDENTIAL_ID"` so importers know they need to reconnect.

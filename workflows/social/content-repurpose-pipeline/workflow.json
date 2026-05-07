@@ -74,6 +74,7 @@
             }
           ]
         },
+        "simplify": false,
         "options": { "maxTokens": 1500 }
       },
       "credentials": {
