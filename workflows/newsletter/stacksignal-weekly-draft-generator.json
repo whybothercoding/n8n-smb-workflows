@@ -2,7 +2,6 @@
   "name": "[StackSignal] Weekly Draft Generator",
   "description": null,
   "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -36,7 +35,8 @@
       "position": [
         0,
         0
-      ]
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -50,21 +50,23 @@
       "position": [
         0,
         192
-      ]
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "url": "https://www.indiehackers.com/feed.rss",
+        "url": "https://www.producthunt.com/feed",
         "options": {}
       },
       "id": "rss-3",
-      "name": "RSS Indie Hackers",
+      "name": "RSS Product Hunt",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
         0,
         384
-      ]
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -78,7 +80,8 @@
       "position": [
         0,
         576
-      ]
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -92,7 +95,8 @@
       "position": [
         0,
         768
-      ]
+      ],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -118,7 +122,9 @@
           "cachedResultName": "stacksignal-news"
         },
         "text": "={{ $node['Prepare RSS Row'].json.slackMessage }}",
-        "otherOptions": {}
+        "otherOptions": {},
+        "resource": "message",
+        "operation": "post"
       },
       "id": "slack-1",
       "name": "Slack Notification",
@@ -213,7 +219,7 @@
       "credentials": {
         "googlePalmApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Google Gemini(PaLM) Api account"
+          "name": "Google AI Studio API"
         }
       }
     },
@@ -234,7 +240,7 @@
       "parameters": {
         "authentication": "databaseToken",
         "operation": "create",
-        "tableId": YOUR_BASEROW_TABLE_ID,
+        "tableId": "YOUR_BASEROW_TABLE_ID",
         "fieldsUi": {
           "fieldValues": [
             {
@@ -263,7 +269,8 @@
           "name": "Baserow"
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "disabled": true
     },
     {
       "parameters": {
@@ -282,25 +289,31 @@
       "parameters": {
         "authentication": "databaseToken",
         "operation": "create",
-        "tableId": YOUR_BASEROW_TABLE_ID,
+        "tableId": "YOUR_BASEROW_TABLE_ID",
         "fieldsUi": {
           "fieldValues": [
             {
+              "fieldId": "7283",
               "fieldValue": "={{ $json.rss_title }}"
             },
             {
+              "fieldId": "7286",
               "fieldValue": "={{ $json.rss_guid }}"
             },
             {
+              "fieldId": "7287",
               "fieldValue": "={{ $json.rss_body_html }}"
             },
             {
+              "fieldId": "7289",
               "fieldValue": "={{ $json.rss_pub_date }}"
             },
             {
+              "fieldId": "7290",
               "fieldValue": "auto"
             },
             {
+              "fieldId": "7291",
               "fieldValue": "queued"
             }
           ]
@@ -338,7 +351,7 @@
             "index": 0
           },
           {
-            "node": "RSS Indie Hackers",
+            "node": "RSS Product Hunt",
             "type": "main",
             "index": 0
           },
@@ -377,7 +390,7 @@
         ]
       ]
     },
-    "RSS Indie Hackers": {
+    "RSS Product Hunt": {
       "main": [
         [
           {
@@ -424,7 +437,7 @@
             "index": 0
           },
           {
-            "node": "RSS Indie Hackers",
+            "node": "RSS Product Hunt",
             "type": "main",
             "index": 0
           },
@@ -542,14 +555,6 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": true,
     "timeSavedPerExecution": 30
-  },
-  "staticData": {
-    "node:Schedule Trigger": {
-      "recurrenceRules": []
-    }
-  },
-  "meta": {
-    "templateCredsSetupCompleted": true
   },
   "tags": [
     {

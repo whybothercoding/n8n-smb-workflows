@@ -1,0 +1,189 @@
+{
+  "name": "[StackSignal] RSS Feed Server",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "\u26a0\ufe0f STABLE URL \u2014 do not change the webhook path. Beehiiv polls GET /webhook/stacksignal-rss-feed to create drafts. Changing the path requires reconfiguring Beehiiv Settings \u2192 RSS.",
+        "height": 120,
+        "width": 500
+      },
+      "id": "sticky-note",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "path": "stacksignal-rss-feed",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-rss-get",
+      "name": "RSS Feed Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        96
+      ],
+      "webhookId": "stacksignal-rss-feed",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "tableId": "YOUR_BASEROW_TABLE_ID",
+        "returnAll": true,
+        "additionalOptions": {}
+      },
+      "id": "baserow-rss-get",
+      "name": "Get RSS Items",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        96
+      ],
+      "credentials": {
+        "baserowTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\nconst sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;\n\nconst recent = items.filter(item => {\n  const d = new Date(item.pub_date);\n  return !isNaN(d.getTime()) && d.getTime() > sevenDaysAgo;\n});\n\nfunction toRFC2822(dateStr) {\n  return new Date(dateStr).toUTCString();\n}\n\nfunction escapeXml(str) {\n  return String(str || '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;');\n}\n\nconst itemsXml = recent.map(item => {\n  const imgTag = item.featured_image_url\n    ? `\\n    <enclosure url=\"${escapeXml(item.featured_image_url)}\" type=\"image/jpeg\" length=\"0\"/>`\n    : '';\n  return `  <item>\\n    <title>${escapeXml(item.title)}</title>\\n    <guid isPermaLink=\"false\">${escapeXml(item.guid)}</guid>\\n    <pubDate>${toRFC2822(item.pub_date)}</pubDate>\\n    <description><![CDATA[${item.body_html || ''}]]></description>${imgTag}\\n  </item>`;\n}).join('\\n');\n\nconst xml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\\n<rss version=\"2.0\">\\n  <channel>\\n    <title>StackSignal</title>\\n    <link>https://stacksignal.news</link>\\n    <description>Weekly signal for indie operators automating their stack</description>\\n${itemsXml}\\n  </channel>\\n</rss>`;\n\nreturn [{ json: { xml, itemCount: recent.length } }];"
+      },
+      "id": "code-xml-builder",
+      "name": "Build RSS XML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.xml }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/rss+xml; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-rss",
+      "name": "Respond with RSS",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\">\n  <channel>\n    <title>StackSignal</title>\n    <link>https://stacksignal.news</link>\n    <description>Weekly signal for indie operators automating their stack</description>\n  </channel>\n</rss>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/rss+xml; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-empty",
+      "name": "Respond Empty RSS",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        192
+      ]
+    }
+  ],
+  "connections": {
+    "RSS Feed Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get RSS Items": {
+      "main": [
+        [
+          {
+            "node": "Build RSS XML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Empty RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build RSS XML": {
+      "main": [
+        [
+          {
+            "node": "Respond with RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Athens",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "errorWorkflow": "NzVfr1sJ9dAJBy4JDoYYJ",
+    "binaryMode": "separate"
+  },
+  "tags": [
+    {
+      "name": "newsletter"
+    },
+    {
+      "name": "beehiiv"
+    },
+    {
+      "name": "webhook"
+    },
+    {
+      "name": "rss"
+    }
+  ]
+}
