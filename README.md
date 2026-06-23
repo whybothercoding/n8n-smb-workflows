@@ -39,6 +39,11 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | 9 | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) | Reporting | Monday summary of Baserow stats → HTML digest email |
 | 10 | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) | Reporting | Contact form → Baserow ticket + Slack alert + AI suggested reply |
 | 11 | [Error Handler](workflows/utilities/error-handler/) | Utilities | Centralized error alert — routes any workflow failure to an email notification |
+| 12 | [StackSignal Weekly Draft Generator](workflows/newsletter/stacksignal-weekly-draft-generator.json) | Newsletter | Sunday cron → 5 RSS feeds → AI-curated *Signal* links + subject options → queued draft in Baserow + Slack ping |
+| 13 | [StackSignal RSS Feed Server](workflows/newsletter/stacksignal-rss-feed-server.json) | Newsletter | Webhook → Baserow → RSS 2.0 feed (last 7 days) for Beehiiv to poll into drafts |
+| 14 | [StackSignal Manual RSS Push](workflows/newsletter/stacksignal-manual-rss-push.json) | Newsletter | Token-auth webhook → queue an ad-hoc item into the RSS feed + Slack confirm |
+
+> **Newsletter set (12–14)** ship as single-file `.json` exports (not folders) — the RSS-to-Beehiiv pipeline behind [StackSignal.news](https://stacksignal.news). Import → set your Baserow table/credential IDs → activate.
 
 ---
 
@@ -56,6 +61,9 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | Get a weekly business numbers email | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) |
 | Route support tickets to Slack + AI draft replies | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) |
 | Get alerted when any workflow fails | [Error Handler](workflows/utilities/error-handler/) |
+| Auto-curate a weekly newsletter draft from RSS | [StackSignal Weekly Draft Generator](workflows/newsletter/stacksignal-weekly-draft-generator.json) |
+| Serve a Baserow queue as an RSS feed for Beehiiv | [StackSignal RSS Feed Server](workflows/newsletter/stacksignal-rss-feed-server.json) |
+| Push an ad-hoc item into a newsletter RSS feed | [StackSignal Manual RSS Push](workflows/newsletter/stacksignal-manual-rss-push.json) |
 
 ---
 
