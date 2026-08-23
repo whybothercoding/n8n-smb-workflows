@@ -88,12 +88,21 @@ def check_error_workflow(data, category, errors):
 
 
 def check_tags(data, category, errors):
+    # n8n's import:workflow needs {"name": "..."} objects to find-or-create a tag entity and
+    # get a real id before the workflows_tags join-table insert — a bare string has no `.name`,
+    # so TagRepository.setTags silently skips it and the insert hits a NOT NULL constraint on
+    # tagId. A full record with a stale `id`/`createdAt` (a real n8n export) leaks instance data.
+    # Only the minimal {"name": ...} shape is both import-safe and free of instance data.
     tags = data.get("tags")
-    if not isinstance(tags, list) or not all(isinstance(t, str) for t in tags):
-        fail(errors, "tags must be an array of plain strings (not n8n tag-record objects)")
+    if not isinstance(tags, list) or not all(
+        isinstance(t, dict) and set(t.keys()) == {"name"} and isinstance(t.get("name"), str)
+        for t in tags
+    ):
+        fail(errors, 'tags must be an array of {"name": "..."} objects only (no id/createdAt/etc.)')
         return
-    if category not in tags:
-        fail(errors, f"tags must include the category slug {category!r}, got {tags}")
+    names = [t["name"] for t in tags]
+    if category not in names:
+        fail(errors, f"tags must include the category slug {category!r}, got {names}")
 
 
 def check_credentials(nodes, errors):

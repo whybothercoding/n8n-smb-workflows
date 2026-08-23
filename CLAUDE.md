@@ -98,11 +98,13 @@ Every `workflow.json` must include these top-level fields (beyond nodes/connecti
   "name": "...",
   "pinData": {},
   "staticData": null,
-  "tags": ["<category>"],
+  "tags": [{ "name": "<category>" }],
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "..." },
   "versionId": "<uuid>"
 }
 ```
 
-`instanceId` must be an empty string (never a real instance ID). The `tags` array should contain the workflow's category slug.
+`instanceId` must be an empty string (never a real instance ID). `tags` must include an entry for the workflow's category slug.
+
+**Tag shape matters for real imports, not just validation.** `tags` must be `{"name": "..."}` objects — never bare strings, never a real export's full tag record (`{"id": ..., "createdAt": ..., ...}`). n8n's `import:workflow` CLI resolves each tag by calling `TagRepository.setTags`, which finds-or-creates a `tag_entity` row by `name` and only then knows the tag's real `id` for the `workflows_tags` join-table insert. A bare string has no `.name`, so `setTags` silently skips it and the later insert writes `tagId: undefined` — `SQLITE_CONSTRAINT: NOT NULL constraint failed: workflows_tags.tagId`, and the import fails outright. This is exactly the kind of defect `validate.sh`'s field checks can't catch (the JSON is well-formed) but the CI's Docker-based n8n import check does — see [How This Repo Is Tested](README.md#how-this-repo-is-tested).

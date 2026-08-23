@@ -120,6 +120,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": ["crm"],
+  "tags": [{"name": "crm"}],
   "versionId": "b1b2c3d4-0002-4abc-8def-000000000002"
 }

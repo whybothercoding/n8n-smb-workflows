@@ -119,6 +119,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": ["newsletter", "beehiiv", "webhook", "rss"],
+  "tags": [{"name": "newsletter"}, {"name": "beehiiv"}, {"name": "webhook"}, {"name": "rss"}],
   "versionId": "b1b2c3d4-0013-4abc-8def-000000000013"
 }
