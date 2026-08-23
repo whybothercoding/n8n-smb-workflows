@@ -2,6 +2,8 @@
 
 Takes an article URL via webhook, scrapes the text, and uses GPT-4o to generate a 5-tweet thread, a LinkedIn post, and a newsletter snippet — all saved to a Notion page.
 
+<!-- picker: Repurpose any article into 3 content formats -->
+
 ## Use Case
 
 Turn one article into three pieces of ready-to-publish content in under 30 seconds. Send any URL to this webhook from your browser (using a bookmarklet or tool like Raycast) and get a full content set waiting for you in Notion.
@@ -16,10 +18,30 @@ Turn one article into three pieces of ready-to-publish content in under 30 secon
 | Node | Type | Purpose |
 |------|------|---------|
 | Webhook | `n8n-nodes-base.webhook` | Receives `{ "url": "https://..." }` POST |
+| Normalize Fields | `n8n-nodes-base.set` | Pins the `url` field so downstream nodes read from a stable name |
 | Fetch Article | `n8n-nodes-base.httpRequest` | Fetches the raw HTML of the article |
 | Extract Text | `n8n-nodes-base.code` | Strips HTML tags, collapses whitespace, truncates to 4000 chars |
 | Generate Content Variations | `n8n-nodes-base.openAi` | Returns structured JSON with tweet_thread, linkedin_post, newsletter_snippet |
 | Save to Notion | `n8n-nodes-base.notion` | Creates a Notion page with all three outputs as blocks |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Webhook"])
+    n1["Normalize Fields"]
+    n2["Fetch Article"]
+    n3["Extract Text"]
+    n4["Generate Content Variations"]
+    n5["Save to Notion"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+    n3 --> n4
+    n4 --> n5
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

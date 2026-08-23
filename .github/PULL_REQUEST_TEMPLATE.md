@@ -4,7 +4,7 @@
 
 ## Category
 
-<!-- crm / email / social / lead-gen / reporting / utilities -->
+<!-- crm / email / social / lead-gen / reporting / newsletter / utilities -->
 
 ## What it automates
 
@@ -16,7 +16,7 @@
 - [ ] All credential IDs use the `REPLACE_WITH_YOUR_CREDENTIAL_ID` placeholder
 - [ ] `settings.errorWorkflow` is set to `REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID`
 - [ ] `README.md` has all required sections (Use Case, Required Credentials, Node Overview, Configuration, Example)
-- [ ] Root `README.md` table updated with a new row
+- [ ] `python3 scripts/generate_docs.py` run — root README tables and Flow Diagram are up to date
 - [ ] `bash validate.sh` passes locally
 
 ## Testing notes

@@ -2,6 +2,8 @@
 
 Syncs every new Beehiiv subscriber to a Baserow CRM table, creating a new row or updating an existing one if the email already exists.
 
+<!-- picker: Sync newsletter subscribers to your CRM -->
+
 ## Use Case
 
 Keep your newsletter subscriber list and CRM in sync automatically. Every time someone subscribes (or re-subscribes) to your Beehiiv newsletter, this workflow checks if their email already exists in Baserow. If yes, it updates their status. If no, it creates a new CRM row.
@@ -20,6 +22,25 @@ Keep your newsletter subscriber list and CRM in sync automatically. Every time s
 | Exists? | `n8n-nodes-base.if` | Routes to update (true) or create (false) |
 | Update Subscriber | `n8n-nodes-base.baserow` | Updates Status and Last Seen on existing row |
 | Create Subscriber | `n8n-nodes-base.baserow` | Creates a new CRM row with all fields |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Beehiiv Webhook"])
+    n1["Map Subscriber Fields"]
+    n2["Check If Email Exists"]
+    n3{"Exists?"}
+    n4["Update Subscriber"]
+    n5["Create Subscriber"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+    n3 --> n4
+    n3 --> n5
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

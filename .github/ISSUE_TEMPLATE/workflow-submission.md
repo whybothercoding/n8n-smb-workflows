@@ -7,7 +7,7 @@ labels: new-workflow
 **Proposed workflow name**
 
 **Category**
-<!-- crm / email / social / lead-gen / reporting / utilities -->
+<!-- crm / email / social / lead-gen / reporting / newsletter / utilities -->
 
 **What it automates**
 <!-- One paragraph: what the workflow does, what triggers it, what it outputs -->

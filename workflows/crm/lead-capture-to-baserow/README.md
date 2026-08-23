@@ -2,6 +2,8 @@
 
 Receives a contact form submission via webhook, normalises the fields, saves the lead to a Baserow table, and sends the submitter a confirmation email.
 
+<!-- picker: Capture form leads into a CRM (via Baserow) -->
+
 ## Use Case
 
 When a visitor fills in a contact or lead-capture form on your website, this workflow automatically stores the lead in your Baserow CRM table and sends an instant acknowledgement email. No manual copy-paste, no missed leads.
@@ -19,6 +21,21 @@ When a visitor fills in a contact or lead-capture form on your website, this wor
 | Normalize Fields | `n8n-nodes-base.set` | Maps form fields to consistent names, adds `created_at` |
 | Create Lead Row | `n8n-nodes-base.baserow` | Creates a new row in your Baserow leads table |
 | Send Confirmation Email | `n8n-nodes-base.emailSend` | Sends a thank-you email to the submitter |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Webhook"])
+    n1["Normalize Fields"]
+    n2["Create Lead Row"]
+    n3["Send Confirmation Email"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

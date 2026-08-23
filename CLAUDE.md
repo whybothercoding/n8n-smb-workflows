@@ -19,7 +19,7 @@ docs/
   credentials-setup.md
 ```
 
-**Categories:** `crm`, `email`, `social`, `lead-gen`, `reporting`, `utilities`. Propose a new one in the PR description if none fits.
+**Categories:** `crm`, `email`, `social`, `lead-gen`, `reporting`, `newsletter`, `utilities`. Propose a new one in the PR description if none fits.
 
 ## Adding or Editing a Workflow
 
@@ -41,15 +41,13 @@ docs/
 3. `## Use Case` — 2–3 sentences: business problem + who uses it
 4. `## Required Credentials` — bulleted list of service + what it's used for
 5. `## Node Overview` — table: Node name | Type (full `n8n-nodes-base.*` string) | Purpose
-6. `## Configuration` — numbered list of what to change post-import (IDs, addresses, field names)
-7. `## Example` — sample input JSON and description of the output/result
+6. `## Flow Diagram` — a Mermaid chart between `<!-- FLOW_DIAGRAM:START -->`/`<!-- FLOW_DIAGRAM:END -->` markers, generated from `connections` by `scripts/generate_docs.py`. Never hand-edit the content between the markers — add the empty marker pair when creating a new workflow README, then run the generator.
+7. `## Configuration` — numbered list of what to change post-import (IDs, addresses, field names)
+8. `## Example` — sample input JSON and description of the output/result
 
 ### Root README Table
 
-When adding a workflow, append a row to the "What's Inside" table in `README.md`:
-```
-| N | [Workflow Name](workflows/<category>/<slug>/) | Category | One-line description |
-```
+Generated — do not hand-edit. After adding a workflow, add a `<!-- picker: If you want to… -->` HTML comment to its README (right after the one-line description, before `## Use Case`) describing when to use it, then run `python3 scripts/generate_docs.py` from the repo root. This regenerates the root README's "What's Inside" and "Which Workflow Do I Need?" tables from every `workflow.json` + README pair on disk, and fills in each workflow's `## Flow Diagram`. Commit whatever it changes. CI runs this in `--check` mode and fails the build if the committed docs are stale.
 
 ### PR Convention
 
@@ -62,10 +60,11 @@ When adding a workflow, append a row to the "What's Inside" table in `README.md`
 Run before committing any workflow change:
 
 ```bash
-bash validate.sh
+python3 scripts/generate_docs.py   # regenerate root README tables + Flow Diagrams
+bash validate.sh                   # scripts/validate.py under the hood
 ```
 
-Checks all `workflow.json` files for: valid JSON, required fields, `active: false`, `executionOrder: v1`, `errorWorkflow` present, no raw API tokens in headers. Must exit 0 before a PR is opened.
+`validate.sh` checks every rule on this page: valid JSON, full envelope (`meta.instanceId`, `pinData`, `staticData`, `tags`, valid UUIDs), `active: false`, `executionOrder: "v1"`, `errorWorkflow` wired, credential-ID placeholders, node-ID/assignment-ID/condition-ID naming convention, declared category, folder layout (no stray JSON outside `<category>/<slug>/workflow.json`), and that the README has all required sections and a root-table entry. Must exit 0 before a PR is opened — CI runs both commands on every push.
 
 ## Credential Placeholder Pattern
 
@@ -77,7 +76,7 @@ Any node that uses credentials must have the credential `id` set to `"REPLACE_WI
 - Use a `Set` node immediately after the trigger to normalise field names before any logic
 - Schedule-triggered flows: default to a sensible cron (e.g. Monday 08:00) — importers will adjust
 - Keep flows linear where possible; branch only when the use case genuinely requires it
-- **OpenAI nodes:** always set `"simplify": false` at the parameter level. The node defaults to `simplify: true`, which strips the `choices[]` wrapper — any downstream expression referencing `$json.choices[0].message.content` will silently return `undefined` without this flag.
+- **OpenAI nodes (`n8n-nodes-base.openAi`):** always set `"simplify": false` at the parameter level. The node defaults to `simplify: true`, which strips the `choices[]` wrapper — any downstream expression referencing `$json.choices[0].message.content` will silently return `undefined` without this flag. This does not apply to `@n8n/n8n-nodes-langchain.*` nodes (e.g. the Agent node) — they have no `simplify` parameter and return their result under `output` instead.
 
 ## Node ID and Field Naming Conventions
 
@@ -86,7 +85,7 @@ Follow the established patterns so the repo stays consistent:
 - **Node IDs:** `node-{workflow-number}-{purpose}` — e.g. `node-003-openai`, `node-007-if`
 - **Assignment IDs** (inside Set nodes): `assign-{workflow-number}-{sequence}` — e.g. `assign-003-001`
 - **Condition IDs** (inside IF nodes): `cond-{workflow-number}-{sequence}` — e.g. `cond-004-001`
-- **Workflow number** is the two-digit sequence from the `id` field (e.g. `0003` → `003`)
+- **Workflow number** is the three-digit sequence from the `id` field (e.g. `0003` → `003`)
 
 ## Required JSON Envelope Fields
 

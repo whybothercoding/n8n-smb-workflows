@@ -2,6 +2,8 @@
 
 Runs every weekday morning, finds leads that haven't been contacted in 3+ days, sends a follow-up email to each one, and records the contact timestamp in Baserow.
 
+<!-- picker: Follow up with leads that went cold -->
+
 ## Use Case
 
 Stop losing warm leads to silence. This workflow automatically identifies leads in your Baserow table that have gone quiet for 3 or more days and sends a short, human-feeling follow-up email. The `last_contacted` field is updated after each send, so the same lead won't be emailed again until another 3 days have passed.
@@ -20,6 +22,23 @@ Stop losing warm leads to silence. This workflow automatically identifies leads 
 | Not Contacted in 3 Days? | `n8n-nodes-base.if` | Filters to leads where `last_contacted` is >3 days ago or empty |
 | Send Follow-up Email | `n8n-nodes-base.emailSend` | Sends a short, personal follow-up to the lead |
 | Update Last Contacted | `n8n-nodes-base.baserow` | Sets `last_contacted` to now and increments `follow_up_count` |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Daily 8am"])
+    n1["Get Stale Leads"]
+    n2{"Not Contacted in 3 Days?"}
+    n3["Send Follow-up Email"]
+    n4["Update Last Contacted"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+    n3 --> n4
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

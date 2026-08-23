@@ -2,6 +2,8 @@
 
 Receives a contact/support form submission, creates a Baserow ticket row, posts an alert to Slack, generates an AI-suggested reply with GPT-4o, and saves the suggestion back to the ticket.
 
+<!-- picker: Route support tickets to Slack + AI draft replies -->
+
 ## Use Case
 
 Give your support inbox instant visibility and a head start on every reply. The moment a customer submits a support form, your team sees it in Slack, a ticket is created in Baserow, and an AI-drafted reply is already waiting in the ticket record — ready to review, edit, and send.
@@ -17,10 +19,30 @@ Give your support inbox instant visibility and a head start on every reply. The 
 | Node | Type | Purpose |
 |------|------|---------|
 | Webhook | `n8n-nodes-base.webhook` | Receives POST from contact/support form |
+| Normalize Fields | `n8n-nodes-base.set` | Maps form fields to consistent names, defaults `subject` |
 | Create Ticket | `n8n-nodes-base.baserow` | Creates a new ticket row with Status = `open` |
 | Post to Slack | `n8n-nodes-base.slack` | Posts a formatted alert to `#support` with ticket details |
 | Generate Suggested Reply | `n8n-nodes-base.openAi` | Writes a draft reply using ticket context |
 | Update Ticket with Suggestion | `n8n-nodes-base.baserow` | Saves the AI reply to the `AI Suggested Reply` field |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Webhook"])
+    n1["Normalize Fields"]
+    n2["Create Ticket"]
+    n3["Post to Slack"]
+    n4["Generate Suggested Reply"]
+    n5["Update Ticket with Suggestion"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+    n3 --> n4
+    n4 --> n5
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

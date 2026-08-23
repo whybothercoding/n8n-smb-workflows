@@ -20,11 +20,26 @@
       }
     },
     {
+      "id": "node-006-set",
+      "name": "Normalize Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [460, 300],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "assign-006-001", "name": "url", "value": "={{ $json.url }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
       "id": "node-006-fetch",
       "name": "Fetch Article",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [460, 300],
+      "position": [680, 300],
       "parameters": {
         "method": "GET",
         "url": "={{ $json.url }}",
@@ -42,9 +57,9 @@
       "name": "Extract Text",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 300],
+      "position": [900, 300],
       "parameters": {
-        "jsCode": "const html = $input.first().json.data;\nconst text = html\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .substring(0, 4000);\n\nreturn [{ json: { text, url: $('Webhook').item.json.url } }];"
+        "jsCode": "const html = $input.first().json.data;\nconst text = html\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/g, ' ')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .substring(0, 4000);\n\nreturn [{ json: { text, url: $('Normalize Fields').item.json.url } }];"
       }
     },
     {
@@ -52,7 +67,7 @@
       "name": "Generate Content Variations",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 1,
-      "position": [900, 300],
+      "position": [1120, 300],
       "parameters": {
         "resource": "text",
         "operation": "message",
@@ -89,7 +104,7 @@
       "name": "Save to Notion",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2,
-      "position": [1120, 300],
+      "position": [1340, 300],
       "parameters": {
         "resource": "databasePage",
         "operation": "create",
@@ -98,12 +113,12 @@
           "value": "YOUR_NOTION_CONTENT_DATABASE_ID",
           "mode": "id"
         },
-        "title": "=Repurposed: {{ $('Webhook').item.json.url }}",
+        "title": "=Repurposed: {{ $('Normalize Fields').item.json.url }}",
         "propertiesUi": {
           "propertyValues": [
             {
               "key": "Source URL|url",
-              "urlValue": "={{ $('Webhook').item.json.url }}"
+              "urlValue": "={{ $('Normalize Fields').item.json.url }}"
             },
             {
               "key": "Status|select",
@@ -154,6 +169,9 @@
   ],
   "connections": {
     "Webhook": {
+      "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
+    },
+    "Normalize Fields": {
       "main": [[{ "node": "Fetch Article", "type": "main", "index": 0 }]]
     },
     "Fetch Article": {
@@ -170,6 +188,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": [],
-  "versionId": "v1b2c3d4-0006-4abc-8def-000000000006"
+  "tags": ["social"],
+  "versionId": "b1b2c3d4-0006-4abc-8def-000000000006"
 }

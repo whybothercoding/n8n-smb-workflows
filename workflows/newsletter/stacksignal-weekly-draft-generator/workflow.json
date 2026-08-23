@@ -1,0 +1,345 @@
+{
+  "id": "a1b2c3d4-0012-4abc-8def-000000000012",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "[StackSignal] Weekly Draft Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * 0"
+            }
+          ]
+        }
+      },
+      "id": "node-012-schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-224, 720]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "1" },
+            { "name": "2" }
+          ]
+        }
+      },
+      "id": "node-012-exec-trigger",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-224, 48]
+    },
+    {
+      "parameters": {
+        "url": "https://blog.n8n.io/rss",
+        "options": {}
+      },
+      "id": "node-012-rss-n8n",
+      "name": "RSS n8n Blog",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/rss",
+        "options": {}
+      },
+      "id": "node-012-rss-hn",
+      "name": "RSS Hacker News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [0, 192]
+    },
+    {
+      "parameters": {
+        "url": "https://www.indiehackers.com/feed.rss",
+        "options": {}
+      },
+      "id": "node-012-rss-ih",
+      "name": "RSS Indie Hackers",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [0, 384]
+    },
+    {
+      "parameters": {
+        "url": "https://latent.space/feed",
+        "options": {}
+      },
+      "id": "node-012-rss-ls",
+      "name": "RSS Latent Space",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [0, 576]
+    },
+    {
+      "parameters": {
+        "url": "https://newsletter.pragmaticengineer.com/feed",
+        "options": {}
+      },
+      "id": "node-012-rss-pe",
+      "name": "RSS Pragmatic Engineer",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [0, 768]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "id": "node-012-merge",
+      "name": "Merge Feeds",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [224, 336]
+    },
+    {
+      "parameters": {
+        "jsCode": "const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);\nconst filtered = $input.all()\n  .filter(item => {\n    const d = new Date(item.json.pubDate || item.json.isoDate || 0);\n    return !isNaN(d.getTime()) && d > sevenDaysAgo;\n  })\n  .map(item => ({\n    title: String(item.json.title || '').trim(),\n    link: String(item.json.link || ''),\n    contentSnippet: String(item.json.contentSnippet || item.json.content || '').slice(0, 400).trim()\n  }));\n\nconst articlesText = filtered.length > 0\n  ? filtered.map(i => 'Title: ' + i.title + '\\nURL: ' + i.link + '\\nSnippet: ' + i.contentSnippet).join('\\n\\n---\\n\\n')\n  : 'No articles found this week. Generate placeholder content for a workflow-automation themed issue.';\n\nreturn [{ json: { itemCount: filtered.length, articlesText } }];"
+      },
+      "id": "node-012-filter",
+      "name": "Filter Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [448, 384]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.articlesText }}",
+        "options": {
+          "systemMessage": "You are the editor of StackSignal, a weekly newsletter for indie operators automating their business stacks with n8n and similar tools. You receive a list of recent articles from RSS feeds.\n\nYour task:\n1. Select the 3–5 most relevant items for the audience (indie operators, solo devs, SMB owners interested in automation, self-hosting, AI tooling).\n2. Write a one-line take for each — opinionated, not neutral. The take should reflect the editor's perspective, not a summary.\n3. Suggest 3 subject line options for this week's issue based on the content themes.\n4. Identify the dominant content theme this week (one of: ai-tooling, workflow-automation, self-hosting, indie-business, saas-economics).\n\nRespond with valid JSON only — no explanation, no markdown, no code fence:\n{\"signal_items\":[{\"title\":\"\",\"url\":\"\",\"take\":\"\"}],\"subject_options\":[\"\",\"\",\"\"],\"theme\":\"\"}",
+          "maxIterations": 3,
+          "enableStreaming": false
+        }
+      },
+      "id": "node-012-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [672, 384]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "maxOutputTokens": 2048,
+          "temperature": 0.7
+        }
+      },
+      "id": "node-012-gemini",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [744, 608],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output;\nif (!output) throw new Error('No output from AI agent');\nlet parsed;\ntry {\n  const cleaned = output.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch(e) {\n  throw new Error('Failed to parse agent JSON: ' + e.message + '. Output was: ' + String(output).slice(0, 300));\n}\nconst si = parsed.signal_items || [];\nconst so = parsed.subject_options || ['StackSignal Draft', 'StackSignal Draft', 'StackSignal Draft'];\nconst theme = parsed.theme || 'workflow-automation';\nconst signalHtml = si.map(i => '<p><strong>' + i.title + '</strong> — <a href=\"' + i.url + '\">' + i.url + '</a><br><em>' + i.take + '</em></p>').join('\\n');\nconst content = '<h2>⚙️ THE WORKFLOW</h2>\\n<p>[Draft here — 550–650 words]</p>\\n<hr>\\n<h2>🔧 THE STACK MOVE</h2>\\n<p>[Draft here — 220–270 words]</p>\\n<hr>\\n<h2>📡 THE SIGNAL</h2>\\n' + signalHtml;\nconst slackMessage = '📝 *StackSignal draft ready*\\n\\n*Theme:* ' + theme + '\\n\\n*Subject options:*\\n1. ' + so[0] + '\\n2. ' + so[1] + '\\n3. ' + so[2] + '\\n\\n*Signal items:* ' + si.length + ' pre-populated\\n\\n→ Open Beehiiv to write Workflow + Stack Move sections';\nreturn [{ json: { signal_items: si, subject_options: so, theme, beehiivTitle: so[0] + ' [DRAFT]', beehiivSubtitle: 'Theme: ' + theme + ' | Options: ' + so.join(' / '), beehiivContent: content, slackMessage } }];"
+      },
+      "id": "node-012-parse",
+      "name": "Parse Agent Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1024, 384]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst parsed = $input.first().json;\nconst so = parsed.subject_options || ['', '', ''];\nconst si = parsed.signal_items || [];\nconst theme = parsed.theme || '';\nconst guid = crypto.randomUUID();\nconst pubDate = new Date().toISOString();\nconst slackMessage = `📝 *StackSignal draft queued in RSS feed*\\n\\n*Theme:* ${theme}\\n\\n*Subject options:*\\n1. ${so[0]}\\n2. ${so[1]}\\n3. ${so[2]}\\n\\n*Signal items:* ${si.length} pre-populated\\n\\n→ Beehiiv picks it up within the hour. Open Beehiiv to write Workflow + Stack Move sections.`;\nreturn [{ json: { ...parsed, rss_guid: guid, rss_pub_date: pubDate, rss_title: parsed.beehiivTitle, rss_body_html: parsed.beehiivContent, slackMessage } }];"
+      },
+      "id": "node-012-prepare",
+      "name": "Prepare RSS Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1248, 384]
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "operation": "create",
+        "tableId": "REPLACE_WITH_YOUR_BASEROW_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldValue": "={{ $json.rss_title }}"
+            },
+            {
+              "fieldValue": "={{ $json.rss_guid }}"
+            },
+            {
+              "fieldValue": "={{ $json.rss_body_html }}"
+            },
+            {
+              "fieldValue": "={{ $json.rss_pub_date }}"
+            },
+            {
+              "fieldValue": "auto"
+            },
+            {
+              "fieldValue": "queued"
+            }
+          ]
+        }
+      },
+      "id": "node-012-baserow-queue",
+      "name": "Queue in RSS Items",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "position": [1472, 384],
+      "credentials": {
+        "baserowTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "operation": "create",
+        "tableId": "REPLACE_WITH_YOUR_BASEROW_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldValue": "={{ $('Prepare RSS Row').item.json.rss_title }}"
+            },
+            {
+              "fieldValue": "drafting"
+            },
+            {
+              "fieldValue": "={{ 'Agent-curated draft. Theme: ' + $('Prepare RSS Row').item.json.theme }}"
+            }
+          ]
+        }
+      },
+      "id": "node-012-baserow-log",
+      "name": "Log to Baserow",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "position": [1696, 384],
+      "credentials": {
+        "baserowTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_SLACK_CHANNEL_ID",
+          "mode": "list",
+          "cachedResultName": "your-newsletter-channel"
+        },
+        "text": "={{ $('Prepare RSS Row').item.json.slackMessage }}",
+        "otherOptions": {}
+      },
+      "id": "node-012-slack",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [1920, 384],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Slack OAuth 2.0 API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "RSS n8n Blog", "type": "main", "index": 0 },
+          { "node": "RSS Hacker News", "type": "main", "index": 0 },
+          { "node": "RSS Indie Hackers", "type": "main", "index": 0 },
+          { "node": "RSS Latent Space", "type": "main", "index": 0 },
+          { "node": "RSS Pragmatic Engineer", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          { "node": "RSS n8n Blog", "type": "main", "index": 0 },
+          { "node": "RSS Hacker News", "type": "main", "index": 0 },
+          { "node": "RSS Indie Hackers", "type": "main", "index": 0 },
+          { "node": "RSS Latent Space", "type": "main", "index": 0 },
+          { "node": "RSS Pragmatic Engineer", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "RSS n8n Blog": {
+      "main": [[{ "node": "Merge Feeds", "type": "main", "index": 0 }]]
+    },
+    "RSS Hacker News": {
+      "main": [[{ "node": "Merge Feeds", "type": "main", "index": 1 }]]
+    },
+    "RSS Indie Hackers": {
+      "main": [[{ "node": "Merge Feeds", "type": "main", "index": 2 }]]
+    },
+    "RSS Latent Space": {
+      "main": [[{ "node": "Merge Feeds", "type": "main", "index": 3 }]]
+    },
+    "RSS Pragmatic Engineer": {
+      "main": [[{ "node": "Merge Feeds", "type": "main", "index": 4 }]]
+    },
+    "Merge Feeds": {
+      "main": [[{ "node": "Filter Articles", "type": "main", "index": 0 }]]
+    },
+    "Filter Articles": {
+      "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "AI Agent": {
+      "main": [[{ "node": "Parse Agent Output", "type": "main", "index": 0 }]]
+    },
+    "Parse Agent Output": {
+      "main": [[{ "node": "Prepare RSS Row", "type": "main", "index": 0 }]]
+    },
+    "Prepare RSS Row": {
+      "main": [[{ "node": "Queue in RSS Items", "type": "main", "index": 0 }]]
+    },
+    "Queue in RSS Items": {
+      "main": [[{ "node": "Log to Baserow", "type": "main", "index": 0 }]]
+    },
+    "Log to Baserow": {
+      "main": [[{ "node": "Slack Notification", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
+  "staticData": null,
+  "tags": ["newsletter"],
+  "versionId": "b1b2c3d4-0012-4abc-8def-000000000012"
+}

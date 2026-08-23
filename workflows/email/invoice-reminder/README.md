@@ -2,6 +2,8 @@
 
 Runs every weekday morning, fetches unpaid overdue invoices from Baserow, sends a reminder email to each client, and marks the reminder as sent.
 
+<!-- picker: Chase unpaid invoices automatically -->
+
 ## Use Case
 
 Stop chasing payments manually. This workflow runs at 9am Monday–Friday, checks your Baserow invoices table for overdue unpaid invoices, and automatically sends a professional reminder email to each client. Each reminder is timestamped in the `Reminder Sent` field.
@@ -20,6 +22,23 @@ Stop chasing payments manually. This workflow runs at 9am Monday–Friday, check
 | Is Overdue? | `n8n-nodes-base.if` | Passes only invoices where `due_date` is in the past |
 | Send Reminder Email | `n8n-nodes-base.emailSend` | Sends a personalized reminder per invoice |
 | Mark Reminder Sent | `n8n-nodes-base.baserow` | Updates `Reminder Sent` timestamp on the row |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Daily 9am"])
+    n1["Get Unpaid Invoices"]
+    n2{"Is Overdue?"}
+    n3["Send Reminder Email"]
+    n4["Mark Reminder Sent"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+    n3 --> n4
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

@@ -15,7 +15,7 @@ cd n8n-smb-workflows
 
 **Step 2 — Create your workflow folder**
 
-Pick the right category (`crm`, `email`, `social`, `lead-gen`, `reporting`, `utilities`) or propose a new one in the PR description.
+Pick the right category (`crm`, `email`, `social`, `lead-gen`, `reporting`, `newsletter`, `utilities`) or propose a new one in the PR description.
 
 ```bash
 mkdir -p workflows/<category>/<your-workflow-name>
@@ -28,11 +28,23 @@ Each workflow directory must contain exactly two files:
 - `workflow.json` — valid n8n workflow export JSON (see format below)
 - `README.md` — usage documentation (see template below)
 
-**Step 4 — Update the main README table**
+**Step 4 — Regenerate the docs**
 
-Add a row to the "What's Inside" table in the root `README.md`.
+```bash
+python3 scripts/generate_docs.py
+```
 
-**Step 5 — Open a PR**
+This rewrites the root README's "What's Inside" / "Which Workflow Do I Need?" tables and refreshes each workflow's Flow Diagram from the on-disk `workflow.json` files — you never hand-edit those tables. Commit whatever it changes.
+
+**Step 5 — Validate**
+
+```bash
+bash validate.sh
+```
+
+Must exit 0 before opening a PR — CI runs this automatically on every push, but catching failures locally first saves a review round trip.
+
+**Step 6 — Open a PR**
 
 Branch name: `add/<your-workflow-name>`
 PR title: `Add: <your-workflow-name>`
@@ -60,7 +72,7 @@ Credential IDs in `credentials` blocks must use the placeholder string `"REPLACE
 
 Every workflow README must contain these sections:
 
-```markdown
+````markdown
 # Workflow Name
 
 One-line description of what this workflow does.
@@ -96,7 +108,7 @@ After importing, update the following:
 
 **Output / Result:**
 Description of what happens after the workflow runs.
-```
+````
 
 ---
 

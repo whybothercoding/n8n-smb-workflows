@@ -2,6 +2,8 @@
 
 Monitors Gmail for new unread emails, generates a draft reply with GPT-4o, and logs the interaction to Notion.
 
+<!-- picker: Auto-draft replies to inbound emails -->
+
 ## Use Case
 
 Never face an empty inbox again. This workflow checks for new unread emails every minute, uses GPT-4o to write a contextual reply, and saves it as a Gmail draft — ready for your review before sending. Every handled email is logged to a Notion database so you have a complete record.
@@ -20,6 +22,21 @@ Never face an empty inbox again. This workflow checks for new unread emails ever
 | Generate Reply | `n8n-nodes-base.openAi` | Sends email content to GPT-4o, returns a draft reply |
 | Create Draft Reply | `n8n-nodes-base.gmail` | Saves the generated text as a Gmail draft in the same thread |
 | Log to Notion | `n8n-nodes-base.notion` | Creates a log entry in your Notion email database |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Gmail Trigger"])
+    n1["Generate Reply"]
+    n2["Create Draft Reply"]
+    n3["Log to Notion"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

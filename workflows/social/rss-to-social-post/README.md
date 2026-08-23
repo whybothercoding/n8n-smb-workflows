@@ -2,6 +2,8 @@
 
 Reads new items from an RSS feed hourly, rewrites each item as a LinkedIn post using GPT-4o, and publishes directly to LinkedIn.
 
+<!-- picker: Turn blog posts into LinkedIn content -->
+
 ## Use Case
 
 Turn your industry news feed or blog into a steady stream of LinkedIn content — automatically. Each RSS item is rewritten in a professional, scroll-stopping LinkedIn format with hashtags. Runs every hour so you're always sharing fresh, relevant content.
@@ -21,6 +23,23 @@ Turn your industry news feed or blog into a steady stream of LinkedIn content �
 | Write LinkedIn Post | `n8n-nodes-base.openAi` | Rewrites each item as a 150-word LinkedIn post |
 | Post to LinkedIn | `n8n-nodes-base.httpRequest` | Posts to LinkedIn UGC Posts API |
 
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Every Hour"])
+    n1["Read RSS Feed"]
+    n2{"Published in Last Hour?"}
+    n3["Write LinkedIn Post"]
+    n4["Post to LinkedIn"]
+    n0 --> n1
+    n1 --> n2
+    n2 --> n3
+    n3 --> n4
+```
+<!-- FLOW_DIAGRAM:END -->
+
 ## Configuration
 
 After importing:
@@ -30,7 +49,6 @@ After importing:
 3. **Post to LinkedIn** — replace `YOUR_LINKEDIN_PERSON_ID` with your LinkedIn person URN (find it by calling `https://api.linkedin.com/v2/me` with your token)
 4. **Write LinkedIn Post** — edit the system prompt to match your brand voice
 5. Connect OpenAI credentials
-
 
 ## Example
 

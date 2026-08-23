@@ -182,6 +182,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": [],
-  "versionId": "v1b2c3d4-0007-4abc-8def-000000000007"
+  "tags": ["lead-gen"],
+  "versionId": "b1b2c3d4-0007-4abc-8def-000000000007"
 }

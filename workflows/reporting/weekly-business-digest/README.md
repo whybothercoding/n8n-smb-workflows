@@ -2,6 +2,8 @@
 
 Every Monday at 8am, pulls new leads and invoice data from Baserow, computes a weekly summary, and emails an HTML digest to the business owner.
 
+<!-- picker: Get a weekly business numbers email -->
+
 ## Use Case
 
 Start every Monday with a clear picture of last week. This workflow automatically compiles your key numbers — new leads, revenue collected, outstanding invoices — into a clean HTML email delivered to your inbox before your day starts. No dashboards to open, no reports to run.
@@ -23,6 +25,30 @@ Start every Monday with a clear picture of last week. This workflow automaticall
 | Aggregate Stats | `n8n-nodes-base.code` | Computes counts, total revenue, and outstanding amount |
 | Build HTML Email | `n8n-nodes-base.set` | Assembles the HTML email body and subject line |
 | Email Digest to Owner | `n8n-nodes-base.emailSend` | Sends the digest to the owner's email address |
+
+## Flow Diagram
+
+<!-- FLOW_DIAGRAM:START -->
+```mermaid
+flowchart LR
+    n0(["Monday 8am"])
+    n1["Get New Leads"]
+    n2["Get Invoices"]
+    n3["Tag as Lead"]
+    n4["Tag as Invoice"]
+    n5["Aggregate Stats"]
+    n6["Build HTML Email"]
+    n7["Email Digest to Owner"]
+    n0 --> n1
+    n0 --> n2
+    n1 --> n3
+    n2 --> n4
+    n3 --> n5
+    n4 --> n5
+    n5 --> n6
+    n6 --> n7
+```
+<!-- FLOW_DIAGRAM:END -->
 
 ## Configuration
 

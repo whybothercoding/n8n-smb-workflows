@@ -29,37 +29,37 @@
         "assignments": {
           "assignments": [
             {
-              "id": "assign-001",
+              "id": "assign-001-001",
               "name": "name",
               "value": "={{ $json.name ?? $json.full_name ?? '' }}",
               "type": "string"
             },
             {
-              "id": "assign-002",
+              "id": "assign-001-002",
               "name": "email",
               "value": "={{ $json.email ?? '' }}",
               "type": "string"
             },
             {
-              "id": "assign-003",
+              "id": "assign-001-003",
               "name": "phone",
               "value": "={{ $json.phone ?? $json.telephone ?? '' }}",
               "type": "string"
             },
             {
-              "id": "assign-004",
+              "id": "assign-001-004",
               "name": "source",
               "value": "={{ $json.source ?? 'website' }}",
               "type": "string"
             },
             {
-              "id": "assign-005",
+              "id": "assign-001-005",
               "name": "message",
               "value": "={{ $json.message ?? '' }}",
               "type": "string"
             },
             {
-              "id": "assign-006",
+              "id": "assign-001-006",
               "name": "created_at",
               "value": "={{ new Date().toISOString() }}",
               "type": "string"
@@ -133,6 +133,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": [],
-  "versionId": "v1b2c3d4-0001-4abc-8def-000000000001"
+  "tags": ["crm"],
+  "versionId": "b1b2c3d4-0001-4abc-8def-000000000001"
 }

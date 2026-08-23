@@ -44,6 +44,23 @@ Toggle the workflow switch to **Active** in the top-right of the editor. For web
 
 ---
 
+## Method C: CLI Import (self-hosted, scripted/bulk imports)
+
+If you're self-hosting n8n and want to import from a script or a deploy pipeline rather than the UI, use n8n's own CLI:
+
+```bash
+# Inside the n8n container / host:
+n8n import:workflow --input=/path/to/workflow.json
+
+# Or against a running Docker container from the host:
+docker cp workflow.json n8n:/tmp/workflow.json
+docker exec n8n n8n import:workflow --input=/tmp/workflow.json
+```
+
+This is exactly how this repo's own CI proves every template is real, importable n8n JSON — see [How This Repo Is Tested](../README.md#how-this-repo-is-tested). Imported workflows still land inactive with credentials unconnected; steps 3–5 above still apply.
+
+---
+
 ## Testing Before Activating
 
 For webhook workflows: use the **Test Workflow** button and send a test request using a tool like [hoppscotch.io](https://hoppscotch.io) or `curl`:

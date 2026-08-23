@@ -79,7 +79,7 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "assign-009-tag-001", "name": "data_type", "value": "lead", "type": "string" }
+            { "id": "assign-009-003", "name": "data_type", "value": "lead", "type": "string" }
           ]
         },
         "options": { "includeOtherFields": true }
@@ -94,7 +94,7 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "assign-009-tag-002", "name": "data_type", "value": "invoice", "type": "string" }
+            { "id": "assign-009-004", "name": "data_type", "value": "invoice", "type": "string" }
           ]
         },
         "options": { "includeOtherFields": true }
@@ -187,6 +187,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": [],
-  "versionId": "v1b2c3d4-0009-4abc-8def-000000000009"
+  "tags": ["reporting"],
+  "versionId": "b1b2c3d4-0009-4abc-8def-000000000009"
 }
