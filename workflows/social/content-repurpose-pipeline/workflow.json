@@ -100,69 +100,29 @@
       }
     },
     {
-      "id": "node-006-notion",
-      "name": "Save to Notion",
-      "type": "n8n-nodes-base.notion",
-      "typeVersion": 2,
+      "id": "node-006-baserow",
+      "name": "Save to Baserow",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
       "position": [1340, 300],
       "parameters": {
-        "resource": "databasePage",
         "operation": "create",
-        "databaseId": {
-          "__rl": true,
-          "value": "YOUR_NOTION_CONTENT_DATABASE_ID",
-          "mode": "id"
-        },
-        "title": "=Repurposed: {{ $('Normalize Fields').item.json.url }}",
-        "propertiesUi": {
-          "propertyValues": [
-            {
-              "key": "Source URL|url",
-              "urlValue": "={{ $('Normalize Fields').item.json.url }}"
-            },
-            {
-              "key": "Status|select",
-              "selectValue": "draft"
-            },
-            {
-              "key": "Created|date",
-              "date": "={{ new Date().toISOString() }}"
-            }
-          ]
-        },
-        "blockUi": {
-          "blockValues": [
-            {
-              "type": "heading_2",
-              "textContent": "Tweet Thread"
-            },
-            {
-              "type": "paragraph",
-              "textContent": "={{ (() => { try { const c = JSON.parse($json.choices[0].message.content); return c.tweet_thread.map((t, i) => (i+1) + '. ' + t).join('\\n\\n'); } catch(e) { return $json.choices[0].message.content; } })() }}"
-            },
-            {
-              "type": "heading_2",
-              "textContent": "LinkedIn Post"
-            },
-            {
-              "type": "paragraph",
-              "textContent": "={{ (() => { try { return JSON.parse($json.choices[0].message.content).linkedin_post; } catch(e) { return ''; } })() }}"
-            },
-            {
-              "type": "heading_2",
-              "textContent": "Newsletter Snippet"
-            },
-            {
-              "type": "paragraph",
-              "textContent": "={{ (() => { try { return JSON.parse($json.choices[0].message.content).newsletter_snippet; } catch(e) { return ''; } })() }}"
-            }
+        "tableId": "REPLACE_WITH_YOUR_BASEROW_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Source URL", "fieldValue": "={{ $('Normalize Fields').item.json.url }}" },
+            { "fieldId": "Status", "fieldValue": "draft" },
+            { "fieldId": "Created", "fieldValue": "={{ new Date().toISOString() }}" },
+            { "fieldId": "Tweet Thread", "fieldValue": "={{ (() => { try { const c = JSON.parse($json.choices[0].message.content); return c.tweet_thread.map((t, i) => (i+1) + '. ' + t).join('\\n\\n'); } catch(e) { return $json.choices[0].message.content; } })() }}" },
+            { "fieldId": "LinkedIn Post", "fieldValue": "={{ (() => { try { return JSON.parse($json.choices[0].message.content).linkedin_post; } catch(e) { return ''; } })() }}" },
+            { "fieldId": "Newsletter Snippet", "fieldValue": "={{ (() => { try { return JSON.parse($json.choices[0].message.content).newsletter_snippet; } catch(e) { return ''; } })() }}" }
           ]
         }
       },
       "credentials": {
-        "notionApi": {
+        "baserowApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Notion account"
+          "name": "Baserow account"
         }
       }
     }
@@ -181,7 +141,7 @@
       "main": [[{ "node": "Generate Content Variations", "type": "main", "index": 0 }]]
     },
     "Generate Content Variations": {
-      "main": [[{ "node": "Save to Notion", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Save to Baserow", "type": "main", "index": 0 }]]
     }
   },
   "pinData": {},

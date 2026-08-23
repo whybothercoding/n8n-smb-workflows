@@ -24,3 +24,10 @@ All notable changes to this repository are documented here. Format loosely follo
 
 ### Removed
 - `docs/superpowers/plans/` — internal AI-agent planning notes, not documentation for a public-facing repo.
+
+### Changed — node standardization
+Consolidated onto one service per role across all 14 workflows, documented in CLAUDE.md's new "Standard Service Per Category" section:
+- **Slack → Discord** for every team/ops alert (`contact-form-team-alert`, `support-ticket-alert`, `error-handler`, both StackSignal alert nodes). Discord's webhook auth needs no app registration or bot install, unlike Slack's OAuth flow.
+- **Notion → Baserow** for structured storage (`ai-email-auto-reply`, `content-repurpose-pipeline`, and the workflow formerly named `contact-form-to-notion`). One "where does this data live" answer across the library instead of two.
+- `contact-form-to-notion` renamed to `contact-form-team-alert`, `support-ticket-to-slack` renamed to `support-ticket-alert` — both folder and workflow name — since neither service named in the old titles is used anymore.
+- AI provider (OpenAI vs Gemini+Agent) deliberately left unconsolidated — see CLAUDE.md for why forcing that would add complexity, not remove it.

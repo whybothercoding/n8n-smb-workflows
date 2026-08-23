@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const crypto = require('crypto');\nconst body = $json.body || $json;\nconst headers = $json.headers || {};\nconst token = String(headers['x-rss-token'] || headers['X-RSS-Token'] || '');\nconst EXPECTED_TOKEN = 'REPLACE_WITH_YOUR_API_TOKEN';\n\n// Constant-time comparison — a plain !== leaks how many leading characters matched\n// via response-time differences, letting an attacker brute-force the token byte by byte.\nfunction timingSafeStringEqual(a, b) {\n  const hashA = crypto.createHash('sha256').update(String(a)).digest();\n  const hashB = crypto.createHash('sha256').update(String(b)).digest();\n  return crypto.timingSafeEqual(hashA, hashB);\n}\n\nif (!timingSafeStringEqual(token, EXPECTED_TOKEN)) {\n  return [{ json: { valid: false, httpStatus: 401, errorMsg: 'Unauthorized' } }];\n}\n\nconst subject = String(body.subject || '').trim();\nconst body_html = String(body.body_html || '').trim();\n\nif (!subject || !body_html) {\n  return [{ json: { valid: false, httpStatus: 400, errorMsg: 'Missing required fields: subject, body_html' } }];\n}\n\nconst guid = crypto.randomUUID();\nconst pubDate = new Date().toISOString();\n\nreturn [{ json: {\n  valid: true,\n  httpStatus: 200,\n  guid,\n  title: subject,\n  body_html,\n  featured_image_url: String(body.featured_image_url || ''),\n  pub_date: pubDate,\n  slackMessage: `✅ Manual draft queued: *${subject}*\\n\\nguid: \\`${guid}\\`\\n→ Beehiiv picks it up within the hour.`\n} }];"
+        "jsCode": "const crypto = require('crypto');\nconst body = $json.body || $json;\nconst headers = $json.headers || {};\nconst token = String(headers['x-rss-token'] || headers['X-RSS-Token'] || '');\nconst EXPECTED_TOKEN = 'REPLACE_WITH_YOUR_API_TOKEN';\n\n// Constant-time comparison — a plain !== leaks how many leading characters matched\n// via response-time differences, letting an attacker brute-force the token byte by byte.\nfunction timingSafeStringEqual(a, b) {\n  const hashA = crypto.createHash('sha256').update(String(a)).digest();\n  const hashB = crypto.createHash('sha256').update(String(b)).digest();\n  return crypto.timingSafeEqual(hashA, hashB);\n}\n\nif (!timingSafeStringEqual(token, EXPECTED_TOKEN)) {\n  return [{ json: { valid: false, httpStatus: 401, errorMsg: 'Unauthorized' } }];\n}\n\nconst subject = String(body.subject || '').trim();\nconst body_html = String(body.body_html || '').trim();\n\nif (!subject || !body_html) {\n  return [{ json: { valid: false, httpStatus: 400, errorMsg: 'Missing required fields: subject, body_html' } }];\n}\n\nconst guid = crypto.randomUUID();\nconst pubDate = new Date().toISOString();\n\nreturn [{ json: {\n  valid: true,\n  httpStatus: 200,\n  guid,\n  title: subject,\n  body_html,\n  featured_image_url: String(body.featured_image_url || ''),\n  pub_date: pubDate,\n  discordMessage: `✅ Manual draft queued: **${subject}**\\n\\nguid: \\`${guid}\\`\\n→ Beehiiv picks it up within the hour.`\n} }];"
       },
       "id": "node-014-code",
       "name": "Validate & Prepare",
@@ -89,29 +89,20 @@
     },
     {
       "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "REPLACE_WITH_YOUR_SLACK_CHANNEL_ID",
-          "mode": "list",
-          "cachedResultName": "your-newsletter-channel"
-        },
-        "text": "={{ $('Validate & Prepare').item.json.slackMessage }}",
-        "otherOptions": {},
-        "resource": "message",
-        "operation": "post"
+        "authentication": "webhook",
+        "operation": "sendLegacy",
+        "content": "={{ $('Validate & Prepare').item.json.discordMessage }}",
+        "options": {}
       },
-      "id": "node-014-slack",
-      "name": "Slack Confirmation",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.4,
+      "id": "node-014-discord",
+      "name": "Discord Confirmation",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
       "position": [896, -80],
-      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
       "credentials": {
-        "slackOAuth2Api": {
+        "discordWebhookApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Slack OAuth 2.0 API"
+          "name": "Discord Webhook"
         }
       },
       "onError": "continueRegularOutput"
@@ -155,9 +146,9 @@
       ]
     },
     "Insert into RSS Items": {
-      "main": [[{ "node": "Slack Confirmation", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Discord Confirmation", "type": "main", "index": 0 }]]
     },
-    "Slack Confirmation": {
+    "Discord Confirmation": {
       "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
     }
   },

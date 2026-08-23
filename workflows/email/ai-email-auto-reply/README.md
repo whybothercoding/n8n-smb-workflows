@@ -1,18 +1,18 @@
 # AI Email Auto-Reply
 
-Monitors Gmail for new unread emails, generates a draft reply with GPT-4o, and logs the interaction to Notion.
+Monitors Gmail for new unread emails, generates a draft reply with GPT-4o, and logs the interaction to Baserow.
 
 <!-- picker: Auto-draft replies to inbound emails -->
 
 ## Use Case
 
-Never face an empty inbox again. This workflow checks for new unread emails every minute, uses GPT-4o to write a contextual reply, and saves it as a Gmail draft — ready for your review before sending. Every handled email is logged to a Notion database so you have a complete record.
+Never face an empty inbox again. This workflow checks for new unread emails every minute, uses GPT-4o to write a contextual reply, and saves it as a Gmail draft — ready for your review before sending. Every handled email is logged to Baserow so you have a complete record.
 
 ## Required Credentials
 
 - **Gmail OAuth2** — read inbox + create drafts
 - **OpenAI API Key** — GPT-4o chat completions
-- **Notion Integration Token** — write to your email log database
+- **Baserow API Key** — write access to your email log table
 
 ## Node Overview
 
@@ -21,7 +21,7 @@ Never face an empty inbox again. This workflow checks for new unread emails ever
 | Gmail Trigger | `n8n-nodes-base.gmailTrigger` | Polls Gmail every minute for new unread emails |
 | Generate Reply | `n8n-nodes-base.openAi` | Sends email content to GPT-4o, returns a draft reply |
 | Create Draft Reply | `n8n-nodes-base.gmail` | Saves the generated text as a Gmail draft in the same thread |
-| Log to Notion | `n8n-nodes-base.notion` | Creates a log entry in your Notion email database |
+| Log to Baserow | `n8n-nodes-base.baserow` | Creates a log row in your Baserow email database |
 
 ## Flow Diagram
 
@@ -31,7 +31,7 @@ flowchart LR
     n0(["Gmail Trigger"])
     n1["Generate Reply"]
     n2["Create Draft Reply"]
-    n3["Log to Notion"]
+    n3["Log to Baserow"]
     n0 --> n1
     n1 --> n2
     n2 --> n3
@@ -44,7 +44,7 @@ After importing:
 
 1. **Gmail Trigger** — connect Gmail OAuth2 credentials; optionally add a sender filter in the `filters` parameters to scope which emails trigger the workflow
 2. **Generate Reply** — edit the `system` message to match your business tone, sign-off name, and any specific instructions (e.g. "if the email is asking for a quote, say we'll follow up within 1 business day")
-3. **Log to Notion** — replace `YOUR_NOTION_EMAIL_LOG_DATABASE_ID`; ensure the database has properties: `From` (email), `Date` (date), `Draft Created` (checkbox)
+3. **Log to Baserow** — replace `REPLACE_WITH_YOUR_BASEROW_TABLE_ID`; ensure the table has columns: `From`, `Subject`, `Date`, `Draft Created` (boolean)
 4. Connect all three credentials
 
 ## Example
@@ -59,4 +59,4 @@ After importing:
 > Thank you for reaching out! We'd be happy to walk you through our automation packages. Could you share a bit more about what you're looking to automate? That'll help us suggest the best fit.
 > The Team
 
-**Notion log entry:** Row with subject "Question about pricing", From = client@example.com, Draft Created = ✓
+**Baserow log entry:** Row with subject "Question about pricing", From = client@example.com, Draft Created = ✓

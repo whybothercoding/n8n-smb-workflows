@@ -32,16 +32,16 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | # | Workflow | Category | Description |
 |---|----------|----------|-------------|
 | 1 | [Lead Capture to Baserow](workflows/crm/lead-capture-to-baserow/) | CRM | Receives a contact form submission via webhook, normalises the fields, saves the lead to a Baserow table, and sends the submitter a confirmation email. |
-| 2 | [Contact Form to Notion](workflows/crm/contact-form-to-notion/) | CRM | Receives a contact form submission via webhook, creates a Notion database page, and posts a summary to a Slack channel. |
-| 3 | [AI Email Auto-Reply](workflows/email/ai-email-auto-reply/) | Email | Monitors Gmail for new unread emails, generates a draft reply with GPT-4o, and logs the interaction to Notion. |
+| 2 | [Contact Form Team Alert](workflows/crm/contact-form-team-alert/) | CRM | Receives a contact form submission via webhook, creates a Baserow CRM row, and posts a summary to Discord. |
+| 3 | [AI Email Auto-Reply](workflows/email/ai-email-auto-reply/) | Email | Monitors Gmail for new unread emails, generates a draft reply with GPT-4o, and logs the interaction to Baserow. |
 | 4 | [Invoice Reminder](workflows/email/invoice-reminder/) | Email | Runs every weekday morning, fetches unpaid overdue invoices from Baserow, sends a reminder email to each client, and marks the reminder as sent. |
 | 5 | [RSS to Social Post](workflows/social/rss-to-social-post/) | Social | Reads new items from an RSS feed hourly, rewrites each item as a LinkedIn post using GPT-4o, and publishes directly to LinkedIn. |
-| 6 | [Content Repurpose Pipeline](workflows/social/content-repurpose-pipeline/) | Social | Takes an article URL via webhook, scrapes the text, and uses GPT-4o to generate a 5-tweet thread, a LinkedIn post, and a newsletter snippet — all saved to a Notion page. |
+| 6 | [Content Repurpose Pipeline](workflows/social/content-repurpose-pipeline/) | Social | Takes an article URL via webhook, scrapes the text, and uses GPT-4o to generate a 5-tweet thread, a LinkedIn post, and a newsletter snippet — all saved to Baserow. |
 | 7 | [Newsletter Subscriber to CRM](workflows/lead-gen/newsletter-subscriber-to-crm/) | Lead Gen | Syncs every new Beehiiv subscriber to a Baserow CRM table, creating a new row or updating an existing one if the email already exists. |
 | 8 | [Abandoned Lead Follow-up](workflows/lead-gen/abandoned-lead-followup/) | Lead Gen | Runs every weekday morning, finds leads that haven't been contacted in 3+ days, sends a follow-up email to each one, and records the contact timestamp in Baserow. |
 | 9 | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) | Reporting | Every Monday at 8am, pulls new leads and invoice data from Baserow, computes a weekly summary, and emails an HTML digest to the business owner. |
-| 10 | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) | Reporting | Receives a contact/support form submission, creates a Baserow ticket row, posts an alert to Slack, generates an AI-suggested reply with GPT-4o, and saves the suggestion back to the ticket. |
-| 11 | [Error Handler](workflows/utilities/error-handler/) | Utilities | Centralized error handler for all other workflows in this library. When any workflow fails, n8n routes the error here and sends an alert email to the business owner. |
+| 10 | [Support Ticket Alert](workflows/reporting/support-ticket-alert/) | Reporting | Receives a contact/support form submission, creates a Baserow ticket row, posts an alert to Discord, generates an AI-suggested reply with GPT-4o, and saves the suggestion back to the ticket. |
+| 11 | [Error Handler](workflows/utilities/error-handler/) | Utilities | Centralized error handler for all other workflows in this library. When any workflow fails, n8n routes the error here and posts an alert to Discord. |
 | 12 | [StackSignal Weekly Draft Generator](workflows/newsletter/stacksignal-weekly-draft-generator/) | Newsletter | Every Sunday evening, pulls the week's top posts from five RSS feeds, has an AI agent curate and write editorial takes on the 3–5 most relevant items, and queues a pre-populated newsletter draft for a human to finish. |
 | 13 | [StackSignal RSS Feed Server](workflows/newsletter/stacksignal-rss-feed-server/) | Newsletter | Serves a live RSS feed of queued newsletter drafts over a webhook, so Beehiiv (or any RSS-polling tool) can pull drafts straight out of your Baserow content queue. |
 | 14 | [StackSignal Manual RSS Push](workflows/newsletter/stacksignal-manual-rss-push/) | Newsletter | A token-authenticated webhook for manually queuing a one-off newsletter draft — for when you want to publish something outside the automated weekly cycle. |
@@ -57,7 +57,7 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | If you want to… | Use |
 |---|---|
 | Capture form leads into a CRM (via Baserow) | [Lead Capture to Baserow](workflows/crm/lead-capture-to-baserow/) |
-| Capture form leads into a CRM (via Notion) | [Contact Form to Notion](workflows/crm/contact-form-to-notion/) |
+| Capture form leads into a CRM and alert the team | [Contact Form Team Alert](workflows/crm/contact-form-team-alert/) |
 | Auto-draft replies to inbound emails | [AI Email Auto-Reply](workflows/email/ai-email-auto-reply/) |
 | Chase unpaid invoices automatically | [Invoice Reminder](workflows/email/invoice-reminder/) |
 | Turn blog posts into LinkedIn content | [RSS to Social Post](workflows/social/rss-to-social-post/) |
@@ -65,7 +65,7 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | Sync newsletter subscribers to your CRM | [Newsletter Subscriber to CRM](workflows/lead-gen/newsletter-subscriber-to-crm/) |
 | Follow up with leads that went cold | [Abandoned Lead Follow-up](workflows/lead-gen/abandoned-lead-followup/) |
 | Get a weekly business numbers email | [Weekly Business Digest](workflows/reporting/weekly-business-digest/) |
-| Route support tickets to Slack + AI draft replies | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) |
+| Route support tickets to Discord + AI draft replies | [Support Ticket Alert](workflows/reporting/support-ticket-alert/) |
 | Get alerted when any workflow fails | [Error Handler](workflows/utilities/error-handler/) |
 | Auto-generate a curated weekly newsletter draft | [StackSignal Weekly Draft Generator](workflows/newsletter/stacksignal-weekly-draft-generator/) |
 | Turn a Baserow content queue into a pollable RSS feed | [StackSignal RSS Feed Server](workflows/newsletter/stacksignal-rss-feed-server/) |

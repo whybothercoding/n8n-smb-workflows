@@ -78,6 +78,17 @@ Any node that uses credentials must have the credential `id` set to `"REPLACE_WI
 - Keep flows linear where possible; branch only when the use case genuinely requires it
 - **OpenAI nodes (`n8n-nodes-base.openAi`):** always set `"simplify": false` at the parameter level. The node defaults to `simplify: true`, which strips the `choices[]` wrapper — any downstream expression referencing `$json.choices[0].message.content` will silently return `undefined` without this flag. This does not apply to `@n8n/n8n-nodes-langchain.*` nodes (e.g. the Agent node) — they have no `simplify` parameter and return their result under `output` instead.
 
+## Standard Service Per Category
+
+Locked so the library stays learnable — one workflow's config transfers to the next instead of every template teaching a different tool for the same job:
+
+- **Team/ops alerts → Discord**, `n8n-nodes-base.discord`, `authentication: "webhook"`, `operation: "sendLegacy"`, message text in the `content` parameter. Never Slack — dropped repo-wide (2026-08-23) because its bot/OAuth setup is real friction for a template a reader is trying to get running in 5 minutes, where Discord's webhook mode is a single copy-pasted URL. Credential type `discordWebhookApi`, name it `"Discord Webhook"`. Message formatting is Discord markdown (`**bold**`), not Slack's (`*bold*`).
+- **Structured data storage → Baserow**, `n8n-nodes-base.baserow`. Never Notion — dropped repo-wide (2026-08-23) to avoid two competing "where does this data live" answers across the library; Baserow's row+field model covers both flat CRM rows and the richer per-workflow content Notion pages used to hold (multi-paragraph fields instead of blocks).
+- **AI text generation → `n8n-nodes-base.openAi`** (gpt-4o) for a single prompt/response. The `@n8n/n8n-nodes-langchain.agent` + Chat Model pattern (currently only the StackSignal newsletter workflows) is the deliberate exception for genuinely multi-step/agentic work — don't convert plain completion workflows to it just for consistency; that adds a node per workflow for no functional gain, which cuts against "keep flows linear" above.
+- **Customer-facing or digest email → SMTP** (`n8n-nodes-base.emailSend`) stays on its own track, not Discord — the recipient there is an end customer or a plain inbox digest, not a team channel, so a chat-platform dependency would be the wrong direction.
+
+If a new workflow's use case doesn't fit an existing category, propose the service choice in the PR description rather than silently introducing a new one-off dependency.
+
 ## Node ID and Field Naming Conventions
 
 Follow the established patterns so the repo stays consistent:

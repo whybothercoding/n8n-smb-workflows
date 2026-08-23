@@ -8,7 +8,9 @@ In n8n, credentials are created via **Settings → Credentials → + Add Credent
 
 ## Baserow API Key
 
-Used by: Lead Capture to Baserow, Invoice Reminder, Newsletter Subscriber to CRM, Abandoned Lead Follow-up, Weekly Business Digest, Support Ticket to Slack, StackSignal Weekly Draft Generator, StackSignal RSS Feed Server, StackSignal Manual RSS Push
+Used by: Lead Capture to Baserow, Contact Form Team Alert, AI Email Auto-Reply, Invoice Reminder, Content Repurpose Pipeline, Newsletter Subscriber to CRM, Abandoned Lead Follow-up, Weekly Business Digest, Support Ticket Alert, StackSignal Weekly Draft Generator, StackSignal RSS Feed Server, StackSignal Manual RSS Push
+
+Baserow is this repo's standard for structured data storage — CRM rows, logs, content queues, tickets. If a workflow needs to store or read rows, it uses this.
 
 1. Log in to your Baserow instance
 2. Go to **Profile → API tokens** → click **Create token**
@@ -18,21 +20,9 @@ Used by: Lead Capture to Baserow, Invoice Reminder, Newsletter Subscriber to CRM
 
 ---
 
-## Notion Integration (Internal)
-
-Used by: Contact Form to Notion, AI Email Auto-Reply, Content Repurpose Pipeline
-
-1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations)
-2. Click **+ New integration** → give it a name → select your workspace → click **Submit**
-3. Copy the **Internal Integration Token** (starts with `secret_`)
-4. In each Notion database you want to connect: open the database → click **...** (top-right) → **Connections** → add your integration
-5. In n8n: **+ Add Credential** → search "Notion" → paste the token
-
----
-
 ## OpenAI API Key
 
-Used by: AI Email Auto-Reply, RSS to Social Post, Content Repurpose Pipeline, Support Ticket to Slack
+Used by: AI Email Auto-Reply, RSS to Social Post, Content Repurpose Pipeline, Support Ticket Alert
 
 1. Go to [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 2. Click **+ Create new secret key** → copy it (shown only once)
@@ -54,21 +44,17 @@ Used by: AI Email Auto-Reply
 
 ---
 
-## Slack
+## Discord Webhook
 
-Used by: Contact Form to Notion, Support Ticket to Slack, StackSignal Weekly Draft Generator (OAuth), StackSignal Manual RSS Push (OAuth)
+Used by: Contact Form Team Alert, Support Ticket Alert, Error Handler, StackSignal Weekly Draft Generator, StackSignal Manual RSS Push
 
-**Option A — Incoming Webhook (simpler, for posting only)**
-1. Go to [https://api.slack.com/apps](https://api.slack.com/apps) → **Create New App** → **From scratch**
-2. Enable **Incoming Webhooks** → **Add New Webhook to Workspace** → select a channel
-3. Copy the webhook URL
-4. In n8n: **+ Add Credential** → search "Slack" → choose **Webhook** type → paste the URL
+Discord is this repo's standard for team/ops alerts — every workflow that used to post to Slack, plus the error handler, uses this. Webhook mode needs no app registration or bot install, unlike Slack's OAuth flow — this is the whole setup:
 
-**Option B — OAuth (for reading and posting)**
-1. Create a Slack app at [https://api.slack.com/apps](https://api.slack.com/apps)
-2. Under **OAuth & Permissions**, add Bot Token Scopes: `chat:write`, `channels:read`
-3. Install the app to your workspace and copy the **Bot User OAuth Token**
-4. In n8n: **+ Add Credential** → search "Slack" → choose **Access Token** → paste the token (StackSignal Weekly Draft Generator specifically uses the **OAuth2** credential type — same app, choose OAuth2 instead of Access Token when creating the credential)
+1. In your Discord server: **Server Settings → Integrations → Webhooks → New Webhook**
+2. Name it, pick the target channel, copy the **Webhook URL** (`https://discord.com/api/webhooks/...`)
+3. In n8n: **+ Add Credential** → search "Discord" → paste the URL into **Webhook URL**
+
+Each workflow's Discord node already has `authentication: webhook` set — you only need to attach the credential, no per-node config.
 
 ---
 
@@ -130,7 +116,9 @@ Not an n8n credential type — a bearer-style token you choose yourself, checked
 
 ## SMTP (Email Send)
 
-Used by: Lead Capture to Baserow, Invoice Reminder, Abandoned Lead Follow-up, Weekly Business Digest, Error Handler
+Used by: Lead Capture to Baserow, Invoice Reminder, Abandoned Lead Follow-up, Weekly Business Digest
+
+These are customer-facing/owner-digest emails, not team alerts — deliberately kept on plain SMTP rather than Discord, since the recipient here is the end customer or a plain inbox digest, not a team channel.
 
 You need an SMTP host, port, username, and password. Common options:
 

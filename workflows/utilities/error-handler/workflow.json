@@ -41,22 +41,21 @@
       }
     },
     {
-      "id": "node-011-email",
+      "id": "node-011-discord",
       "name": "Send Error Alert",
-      "type": "n8n-nodes-base.emailSend",
+      "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [680, 300],
       "parameters": {
-        "fromEmail": "n8n-alerts@yourcompany.com",
-        "toEmail": "owner@yourcompany.com",
-        "subject": "={{ $json.subject }}",
-        "message": "={{ $json.body }}",
+        "authentication": "webhook",
+        "operation": "sendLegacy",
+        "content": "={{ $json.subject }}\n\n{{ $json.body }}",
         "options": {}
       },
       "credentials": {
-        "smtp": {
+        "discordWebhookApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "SMTP account"
+          "name": "Discord Webhook"
         }
       }
     }

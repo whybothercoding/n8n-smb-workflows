@@ -156,7 +156,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const output = $input.first().json.output;\nif (!output) throw new Error('No output from AI agent');\nlet parsed;\ntry {\n  const cleaned = output.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch(e) {\n  throw new Error('Failed to parse agent JSON: ' + e.message + '. Output was: ' + String(output).slice(0, 300));\n}\nconst si = parsed.signal_items || [];\nconst so = parsed.subject_options || ['StackSignal Draft', 'StackSignal Draft', 'StackSignal Draft'];\nconst theme = parsed.theme || 'workflow-automation';\n\n// signal_items text originates from RSS feed content by way of the AI agent — treat it as\n// untrusted and escape before embedding in HTML that becomes the newsletter draft body.\nfunction escapeHtml(str) {\n  return String(str || '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#39;');\n}\n\nfunction sanitizeUrl(str) {\n  // Blocks javascript:/data: URI XSS — escapeHtml alone can't neutralize a dangerous scheme.\n  const s = String(str || '').trim();\n  return /^https?:\\/\\//i.test(s) ? s : '#';\n}\n\nconst signalHtml = si.map(i => {\n  const title = escapeHtml(i.title);\n  const url = escapeHtml(sanitizeUrl(i.url));\n  const take = escapeHtml(i.take);\n  return '<p><strong>' + title + '</strong> — <a href=\"' + url + '\">' + url + '</a><br><em>' + take + '</em></p>';\n}).join('\\n');\nconst content = '<h2>⚙️ THE WORKFLOW</h2>\\n<p>[Draft here — 550–650 words]</p>\\n<hr>\\n<h2>🔧 THE STACK MOVE</h2>\\n<p>[Draft here — 220–270 words]</p>\\n<hr>\\n<h2>📡 THE SIGNAL</h2>\\n' + signalHtml;\nconst slackMessage = '📝 *StackSignal draft ready*\\n\\n*Theme:* ' + theme + '\\n\\n*Subject options:*\\n1. ' + so[0] + '\\n2. ' + so[1] + '\\n3. ' + so[2] + '\\n\\n*Signal items:* ' + si.length + ' pre-populated\\n\\n→ Open Beehiiv to write Workflow + Stack Move sections';\nreturn [{ json: { signal_items: si, subject_options: so, theme, beehiivTitle: so[0] + ' [DRAFT]', beehiivSubtitle: 'Theme: ' + theme + ' | Options: ' + so.join(' / '), beehiivContent: content, slackMessage } }];"
+        "jsCode": "const output = $input.first().json.output;\nif (!output) throw new Error('No output from AI agent');\nlet parsed;\ntry {\n  const cleaned = output.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch(e) {\n  throw new Error('Failed to parse agent JSON: ' + e.message + '. Output was: ' + String(output).slice(0, 300));\n}\nconst si = parsed.signal_items || [];\nconst so = parsed.subject_options || ['StackSignal Draft', 'StackSignal Draft', 'StackSignal Draft'];\nconst theme = parsed.theme || 'workflow-automation';\n\n// signal_items text originates from RSS feed content by way of the AI agent — treat it as\n// untrusted and escape before embedding in HTML that becomes the newsletter draft body.\nfunction escapeHtml(str) {\n  return String(str || '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#39;');\n}\n\nfunction sanitizeUrl(str) {\n  // Blocks javascript:/data: URI XSS — escapeHtml alone can't neutralize a dangerous scheme.\n  const s = String(str || '').trim();\n  return /^https?:\\/\\//i.test(s) ? s : '#';\n}\n\nconst signalHtml = si.map(i => {\n  const title = escapeHtml(i.title);\n  const url = escapeHtml(sanitizeUrl(i.url));\n  const take = escapeHtml(i.take);\n  return '<p><strong>' + title + '</strong> — <a href=\"' + url + '\">' + url + '</a><br><em>' + take + '</em></p>';\n}).join('\\n');\nconst content = '<h2>⚙️ THE WORKFLOW</h2>\\n<p>[Draft here — 550–650 words]</p>\\n<hr>\\n<h2>🔧 THE STACK MOVE</h2>\\n<p>[Draft here — 220–270 words]</p>\\n<hr>\\n<h2>📡 THE SIGNAL</h2>\\n' + signalHtml;\nconst discordMessage = '📝 **StackSignal draft ready**\\n\\n**Theme:** ' + theme + '\\n\\n**Subject options:**\\n1. ' + so[0] + '\\n2. ' + so[1] + '\\n3. ' + so[2] + '\\n\\n**Signal items:** ' + si.length + ' pre-populated\\n\\n→ Open Beehiiv to write Workflow + Stack Move sections';\nreturn [{ json: { signal_items: si, subject_options: so, theme, beehiivTitle: so[0] + ' [DRAFT]', beehiivSubtitle: 'Theme: ' + theme + ' | Options: ' + so.join(' / '), beehiivContent: content, discordMessage } }];"
       },
       "id": "node-012-parse",
       "name": "Parse Agent Output",
@@ -166,7 +166,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const crypto = require('crypto');\nconst parsed = $input.first().json;\nconst so = parsed.subject_options || ['', '', ''];\nconst si = parsed.signal_items || [];\nconst theme = parsed.theme || '';\nconst guid = crypto.randomUUID();\nconst pubDate = new Date().toISOString();\nconst slackMessage = `📝 *StackSignal draft queued in RSS feed*\\n\\n*Theme:* ${theme}\\n\\n*Subject options:*\\n1. ${so[0]}\\n2. ${so[1]}\\n3. ${so[2]}\\n\\n*Signal items:* ${si.length} pre-populated\\n\\n→ Beehiiv picks it up within the hour. Open Beehiiv to write Workflow + Stack Move sections.`;\nreturn [{ json: { ...parsed, rss_guid: guid, rss_pub_date: pubDate, rss_title: parsed.beehiivTitle, rss_body_html: parsed.beehiivContent, slackMessage } }];"
+        "jsCode": "const crypto = require('crypto');\nconst parsed = $input.first().json;\nconst so = parsed.subject_options || ['', '', ''];\nconst si = parsed.signal_items || [];\nconst theme = parsed.theme || '';\nconst guid = crypto.randomUUID();\nconst pubDate = new Date().toISOString();\nconst discordMessage = `📝 **StackSignal draft queued in RSS feed**\\n\\n**Theme:** ${theme}\\n\\n**Subject options:**\\n1. ${so[0]}\\n2. ${so[1]}\\n3. ${so[2]}\\n\\n**Signal items:** ${si.length} pre-populated\\n\\n→ Beehiiv picks it up within the hour. Open Beehiiv to write Workflow + Stack Move sections.`;\nreturn [{ json: { ...parsed, rss_guid: guid, rss_pub_date: pubDate, rss_title: parsed.beehiivTitle, rss_body_html: parsed.beehiivContent, discordMessage } }];"
       },
       "id": "node-012-prepare",
       "name": "Prepare RSS Row",
@@ -256,30 +256,23 @@
     },
     {
       "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "REPLACE_WITH_YOUR_SLACK_CHANNEL_ID",
-          "mode": "list",
-          "cachedResultName": "your-newsletter-channel"
-        },
-        "text": "={{ $('Prepare RSS Row').item.json.slackMessage }}",
-        "otherOptions": {}
+        "authentication": "webhook",
+        "operation": "sendLegacy",
+        "content": "={{ $('Prepare RSS Row').item.json.discordMessage }}",
+        "options": {}
       },
-      "id": "node-012-slack",
-      "name": "Slack Notification",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.4,
+      "id": "node-012-discord",
+      "name": "Discord Notification",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
       "position": [1920, 384],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
-      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
       "credentials": {
-        "slackOAuth2Api": {
+        "discordWebhookApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Slack OAuth 2.0 API"
+          "name": "Discord Webhook"
         }
       },
       "onError": "continueRegularOutput"
@@ -345,7 +338,7 @@
       "main": [[{ "node": "Log to Baserow", "type": "main", "index": 0 }]]
     },
     "Log to Baserow": {
-      "main": [[{ "node": "Slack Notification", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Discord Notification", "type": "main", "index": 0 }]]
     }
   },
   "pinData": {},

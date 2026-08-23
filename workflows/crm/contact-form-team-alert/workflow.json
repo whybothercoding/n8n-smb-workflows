@@ -4,7 +4,7 @@
     "instanceId": "",
     "templateCredsSetupCompleted": true
   },
-  "name": "Contact Form to Notion",
+  "name": "Contact Form Team Alert",
   "nodes": [
     {
       "id": "node-002-webhook",
@@ -39,68 +39,48 @@
       }
     },
     {
-      "id": "node-002-notion",
-      "name": "Create Notion Page",
-      "type": "n8n-nodes-base.notion",
-      "typeVersion": 2,
+      "id": "node-002-baserow",
+      "name": "Create CRM Row",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1,
       "position": [680, 300],
       "parameters": {
-        "resource": "databasePage",
         "operation": "create",
-        "databaseId": {
-          "__rl": true,
-          "value": "YOUR_NOTION_DATABASE_ID",
-          "mode": "id"
-        },
-        "title": "={{ $json.name }} — {{ new Date().toLocaleDateString('en-GB') }}",
-        "blockUi": {
-          "blockValues": []
-        },
-        "propertiesUi": {
-          "propertyValues": [
-            {
-              "key": "Email|email",
-              "emailValue": "={{ $json.email }}"
-            },
-            {
-              "key": "Phone|phone_number",
-              "phoneValue": "={{ $json.phone ?? '' }}"
-            },
-            {
-              "key": "Source|select",
-              "selectValue": "={{ $json.source ?? 'website' }}"
-            },
-            {
-              "key": "Message|rich_text",
-              "textContent": "={{ $json.message ?? '' }}"
-            }
+        "tableId": "REPLACE_WITH_YOUR_BASEROW_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "Name", "fieldValue": "={{ $json.name }}" },
+            { "fieldId": "Email", "fieldValue": "={{ $json.email }}" },
+            { "fieldId": "Phone", "fieldValue": "={{ $json.phone }}" },
+            { "fieldId": "Source", "fieldValue": "={{ $json.source }}" },
+            { "fieldId": "Message", "fieldValue": "={{ $json.message }}" },
+            { "fieldId": "Created At", "fieldValue": "={{ new Date().toISOString() }}" }
           ]
         }
       },
       "credentials": {
-        "notionApi": {
+        "baserowApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Notion account"
+          "name": "Baserow account"
         }
       }
     },
     {
-      "id": "node-002-slack",
-      "name": "Slack Notification",
-      "type": "n8n-nodes-base.slack",
+      "id": "node-002-discord",
+      "name": "Discord Alert",
+      "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [900, 300],
       "parameters": {
-        "resource": "message",
-        "operation": "post",
-        "channel": "#contacts",
-        "text": ":mailbox_with_mail: *New contact form submission*\n*Name:* {{ $('Normalize Fields').item.json.name }}\n*Email:* {{ $('Normalize Fields').item.json.email }}\n*Message:* {{ $('Normalize Fields').item.json.message || '(no message)' }}\n<{{ $json.url }}|View in Notion>",
-        "otherOptions": {}
+        "authentication": "webhook",
+        "operation": "sendLegacy",
+        "content": "📬 **New contact form submission**\n**Name:** {{ $('Normalize Fields').item.json.name }}\n**Email:** {{ $('Normalize Fields').item.json.email }}\n**Message:** {{ $('Normalize Fields').item.json.message || '(no message)' }}",
+        "options": {}
       },
       "credentials": {
-        "slackApi": {
+        "discordWebhookApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Slack account"
+          "name": "Discord Webhook"
         }
       }
     }
@@ -110,16 +90,16 @@
       "main": [[{ "node": "Normalize Fields", "type": "main", "index": 0 }]]
     },
     "Normalize Fields": {
-      "main": [[{ "node": "Create Notion Page", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Create CRM Row", "type": "main", "index": 0 }]]
     },
-    "Create Notion Page": {
-      "main": [[{ "node": "Slack Notification", "type": "main", "index": 0 }]]
+    "Create CRM Row": {
+      "main": [[{ "node": "Discord Alert", "type": "main", "index": 0 }]]
     }
   },
   "pinData": {},
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": [{"name": "crm"}],
+  "tags": [{ "name": "crm" }],
   "versionId": "b1b2c3d4-0002-4abc-8def-000000000002"
 }
