@@ -22,7 +22,7 @@ For a solo newsletter operator, the blank-page problem is the biggest weekly tim
 | When Executed by Another Workflow | `n8n-nodes-base.executeWorkflowTrigger` | Lets another workflow trigger this one on demand |
 | RSS n8n Blog | `n8n-nodes-base.rssFeedRead` | Reads the n8n blog feed |
 | RSS Hacker News | `n8n-nodes-base.rssFeedRead` | Reads the Hacker News feed |
-| RSS Indie Hackers | `n8n-nodes-base.rssFeedRead` | Reads the Indie Hackers feed |
+| RSS Product Hunt | `n8n-nodes-base.rssFeedRead` | Reads the Product Hunt feed |
 | RSS Latent Space | `n8n-nodes-base.rssFeedRead` | Reads the Latent Space feed |
 | RSS Pragmatic Engineer | `n8n-nodes-base.rssFeedRead` | Reads the Pragmatic Engineer feed |
 | Merge Feeds | `n8n-nodes-base.merge` | Combines all 5 feeds into one list |
@@ -32,7 +32,7 @@ For a solo newsletter operator, the blank-page problem is the biggest weekly tim
 | Parse Agent Output | `n8n-nodes-base.code` | Parses the agent's JSON into structured fields + a Slack summary |
 | Prepare RSS Row | `n8n-nodes-base.code` | Shapes the row for the content queue (GUID, pub date, HTML body) |
 | Queue in RSS Items | `n8n-nodes-base.baserow` | Inserts the draft into your content queue table |
-| Log to Baserow | `n8n-nodes-base.baserow` | Logs the draft as a tracked record |
+| Log to Baserow | `n8n-nodes-base.baserow` | Logs the draft as a tracked record (ships **disabled** — enable it if you want this secondary log) |
 | Slack Notification | `n8n-nodes-base.slack` | Posts "draft ready" with subject-line options to Slack |
 
 ## Flow Diagram
@@ -44,7 +44,7 @@ flowchart LR
     n1(["When Executed by Another Workflow"])
     n2["RSS n8n Blog"]
     n3["RSS Hacker News"]
-    n4["RSS Indie Hackers"]
+    n4["RSS Product Hunt"]
     n5["RSS Latent Space"]
     n6["RSS Pragmatic Engineer"]
     n7["Merge Feeds"]
@@ -88,10 +88,10 @@ After importing:
 
 1. **RSS nodes** — swap the 5 feed URLs for whatever sources you want curated (industry blogs, competitor newsletters, niche forums)
 2. **Google Gemini Chat Model** — connect your Gemini credential; swap `modelName` for another Gemini/OpenAI-compatible model if preferred
-3. **Queue in RSS Items** and **Log to Baserow** — replace `REPLACE_WITH_YOUR_BASEROW_TABLE_ID` with your actual table IDs (they can be the same table or two different ones)
+3. **Queue in RSS Items** and **Log to Baserow** — replace `REPLACE_WITH_YOUR_BASEROW_TABLE_ID` with your actual table ID, and replace each `REPLACE_WITH_YOUR_..._FIELD_ID` with the numeric field ID from your Baserow table (find it in the table's API docs panel, or via the Baserow API)
 4. **Slack Notification** — replace `REPLACE_WITH_YOUR_SLACK_CHANNEL_ID` with your channel's ID
 5. **AI Agent** — edit the system prompt's audience description and content themes to match your own newsletter's voice
-6. Connect credentials: Google Gemini → "Google Gemini(PaLM) Api account", Baserow → "Baserow", Slack → "Slack OAuth 2.0 API"
+6. Connect credentials: Google Gemini → "Google AI Studio API", Baserow → "Baserow", Slack → "Slack OAuth 2.0 API"
 
 ## Example
 

@@ -1,0 +1,170 @@
+{
+  "id": "a1b2c3d4-0014-4abc-8def-000000000014",
+  "meta": {
+    "instanceId": "",
+    "templateCredsSetupCompleted": true
+  },
+  "name": "[StackSignal] Manual RSS Push",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rss-push",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-014-webhook",
+      "name": "Manual Push Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 16],
+      "webhookId": "rss-push",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\nconst headers = $json.headers || {};\nconst token = String(headers['x-rss-token'] || headers['X-RSS-Token'] || '');\nconst EXPECTED_TOKEN = 'REPLACE_WITH_YOUR_API_TOKEN';\n\nif (token !== EXPECTED_TOKEN) {\n  return [{ json: { valid: false, httpStatus: 401, errorMsg: 'Unauthorized' } }];\n}\n\nconst subject = String(body.subject || '').trim();\nconst body_html = String(body.body_html || '').trim();\n\nif (!subject || !body_html) {\n  return [{ json: { valid: false, httpStatus: 400, errorMsg: 'Missing required fields: subject, body_html' } }];\n}\n\nconst crypto = require('crypto');\nconst guid = crypto.randomUUID();\nconst pubDate = new Date().toISOString();\n\nreturn [{ json: {\n  valid: true,\n  httpStatus: 200,\n  guid,\n  title: subject,\n  body_html,\n  featured_image_url: String(body.featured_image_url || ''),\n  pub_date: pubDate,\n  slackMessage: `✅ Manual draft queued: *${subject}*\\n\\nguid: \\`${guid}\\`\\n→ Beehiiv picks it up within the hour.`\n} }];"
+      },
+      "id": "node-014-code",
+      "name": "Validate & Prepare",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [224, 16]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-014-001",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-014-if",
+      "name": "Valid Request?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [448, 16]
+    },
+    {
+      "parameters": {
+        "authentication": "databaseToken",
+        "operation": "create",
+        "tableId": "REPLACE_WITH_YOUR_BASEROW_TABLE_ID",
+        "fieldsUi": {
+          "fieldValues": [
+            { "fieldId": "REPLACE_WITH_YOUR_TITLE_FIELD_ID", "fieldValue": "={{ $json.title }}" },
+            { "fieldId": "REPLACE_WITH_YOUR_GUID_FIELD_ID", "fieldValue": "={{ $json.guid }}" },
+            { "fieldId": "REPLACE_WITH_YOUR_BODY_HTML_FIELD_ID", "fieldValue": "={{ $json.body_html }}" },
+            { "fieldId": "REPLACE_WITH_YOUR_IMAGE_FIELD_ID", "fieldValue": "={{ $json.featured_image_url }}" },
+            { "fieldId": "REPLACE_WITH_YOUR_PUB_DATE_FIELD_ID", "fieldValue": "={{ $json.pub_date }}" },
+            { "fieldId": "REPLACE_WITH_YOUR_SOURCE_FIELD_ID", "fieldValue": "manual" },
+            { "fieldId": "REPLACE_WITH_YOUR_STATUS_FIELD_ID", "fieldValue": "queued" }
+          ]
+        }
+      },
+      "id": "node-014-baserow",
+      "name": "Insert into RSS Items",
+      "type": "n8n-nodes-base.baserow",
+      "typeVersion": 1.1,
+      "position": [672, -80],
+      "credentials": {
+        "baserowTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Baserow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_YOUR_SLACK_CHANNEL_ID",
+          "mode": "list",
+          "cachedResultName": "your-newsletter-channel"
+        },
+        "text": "={{ $('Validate & Prepare').item.json.slackMessage }}",
+        "otherOptions": {},
+        "resource": "message",
+        "operation": "post"
+      },
+      "id": "node-014-slack",
+      "name": "Slack Confirmation",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [896, -80],
+      "webhookId": "REPLACE_WITH_YOUR_WEBHOOK_ID",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Slack OAuth 2.0 API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ queued: true, guid: $('Validate & Prepare').item.json.guid }) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "node-014-respond",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, -80]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ error: $json.errorMsg }) }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "node-014-respond-error",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [672, 112]
+    }
+  ],
+  "connections": {
+    "Manual Push Webhook": {
+      "main": [[{ "node": "Validate & Prepare", "type": "main", "index": 0 }]]
+    },
+    "Validate & Prepare": {
+      "main": [[{ "node": "Valid Request?", "type": "main", "index": 0 }]]
+    },
+    "Valid Request?": {
+      "main": [
+        [{ "node": "Insert into RSS Items", "type": "main", "index": 0 }],
+        [{ "node": "Respond Error", "type": "main", "index": 0 }]
+      ]
+    },
+    "Insert into RSS Items": {
+      "main": [[{ "node": "Slack Confirmation", "type": "main", "index": 0 }]]
+    },
+    "Slack Confirmation": {
+      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
+  "staticData": null,
+  "tags": ["newsletter", "beehiiv"],
+  "versionId": "b1b2c3d4-0014-4abc-8def-000000000014"
+}

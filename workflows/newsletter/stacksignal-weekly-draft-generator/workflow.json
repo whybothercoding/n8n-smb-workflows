@@ -47,7 +47,8 @@
       "name": "RSS n8n Blog",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
-      "position": [0, 0]
+      "position": [0, 0],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -58,18 +59,20 @@
       "name": "RSS Hacker News",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
-      "position": [0, 192]
+      "position": [0, 192],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "url": "https://www.indiehackers.com/feed.rss",
+        "url": "https://www.producthunt.com/feed",
         "options": {}
       },
-      "id": "node-012-rss-ih",
-      "name": "RSS Indie Hackers",
+      "id": "node-012-rss-ph",
+      "name": "RSS Product Hunt",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
-      "position": [0, 384]
+      "position": [0, 384],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -80,7 +83,8 @@
       "name": "RSS Latent Space",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
-      "position": [0, 576]
+      "position": [0, 576],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -91,7 +95,8 @@
       "name": "RSS Pragmatic Engineer",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
-      "position": [0, 768]
+      "position": [0, 768],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -145,7 +150,7 @@
       "credentials": {
         "googlePalmApi": {
           "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
-          "name": "Google Gemini(PaLM) Api account"
+          "name": "Google AI Studio API"
         }
       }
     },
@@ -177,21 +182,27 @@
         "fieldsUi": {
           "fieldValues": [
             {
+              "fieldId": "REPLACE_WITH_YOUR_TITLE_FIELD_ID",
               "fieldValue": "={{ $json.rss_title }}"
             },
             {
+              "fieldId": "REPLACE_WITH_YOUR_GUID_FIELD_ID",
               "fieldValue": "={{ $json.rss_guid }}"
             },
             {
+              "fieldId": "REPLACE_WITH_YOUR_BODY_HTML_FIELD_ID",
               "fieldValue": "={{ $json.rss_body_html }}"
             },
             {
+              "fieldId": "REPLACE_WITH_YOUR_PUB_DATE_FIELD_ID",
               "fieldValue": "={{ $json.rss_pub_date }}"
             },
             {
+              "fieldId": "REPLACE_WITH_YOUR_SOURCE_FIELD_ID",
               "fieldValue": "auto"
             },
             {
+              "fieldId": "REPLACE_WITH_YOUR_STATUS_FIELD_ID",
               "fieldValue": "queued"
             }
           ]
@@ -240,7 +251,8 @@
           "name": "Baserow"
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "disabled": true
     },
     {
       "parameters": {
@@ -279,7 +291,7 @@
         [
           { "node": "RSS n8n Blog", "type": "main", "index": 0 },
           { "node": "RSS Hacker News", "type": "main", "index": 0 },
-          { "node": "RSS Indie Hackers", "type": "main", "index": 0 },
+          { "node": "RSS Product Hunt", "type": "main", "index": 0 },
           { "node": "RSS Latent Space", "type": "main", "index": 0 },
           { "node": "RSS Pragmatic Engineer", "type": "main", "index": 0 }
         ]
@@ -290,7 +302,7 @@
         [
           { "node": "RSS n8n Blog", "type": "main", "index": 0 },
           { "node": "RSS Hacker News", "type": "main", "index": 0 },
-          { "node": "RSS Indie Hackers", "type": "main", "index": 0 },
+          { "node": "RSS Product Hunt", "type": "main", "index": 0 },
           { "node": "RSS Latent Space", "type": "main", "index": 0 },
           { "node": "RSS Pragmatic Engineer", "type": "main", "index": 0 }
         ]
@@ -302,7 +314,7 @@
     "RSS Hacker News": {
       "main": [[{ "node": "Merge Feeds", "type": "main", "index": 1 }]]
     },
-    "RSS Indie Hackers": {
+    "RSS Product Hunt": {
       "main": [[{ "node": "Merge Feeds", "type": "main", "index": 2 }]]
     },
     "RSS Latent Space": {

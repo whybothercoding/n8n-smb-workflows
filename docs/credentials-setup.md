@@ -8,7 +8,7 @@ In n8n, credentials are created via **Settings → Credentials → + Add Credent
 
 ## Baserow API Key
 
-Used by: Lead Capture to Baserow, Invoice Reminder, Newsletter Subscriber to CRM, Abandoned Lead Follow-up, Weekly Business Digest, Support Ticket to Slack, StackSignal Weekly Draft Generator
+Used by: Lead Capture to Baserow, Invoice Reminder, Newsletter Subscriber to CRM, Abandoned Lead Follow-up, Weekly Business Digest, Support Ticket to Slack, StackSignal Weekly Draft Generator, StackSignal RSS Feed Server, StackSignal Manual RSS Push
 
 1. Log in to your Baserow instance
 2. Go to **Profile → API tokens** → click **Create token**
@@ -56,7 +56,7 @@ Used by: AI Email Auto-Reply
 
 ## Slack
 
-Used by: Contact Form to Notion, Support Ticket to Slack, StackSignal Weekly Draft Generator (OAuth)
+Used by: Contact Form to Notion, Support Ticket to Slack, StackSignal Weekly Draft Generator (OAuth), StackSignal Manual RSS Push (OAuth)
 
 **Option A — Incoming Webhook (simpler, for posting only)**
 1. Go to [https://api.slack.com/apps](https://api.slack.com/apps) → **Create New App** → **From scratch**
@@ -102,6 +102,29 @@ Configured on Beehiiv's side, not an n8n credential — the workflow's Webhook n
 
 1. Copy the workflow's webhook URL after importing
 2. In Beehiiv: **Settings → Integrations → Webhooks** → add the URL for the `subscriber.created` and `subscriber.updated` events
+
+---
+
+## Beehiiv RSS Integration
+
+Used by: StackSignal RSS Feed Server
+
+The opposite direction from the webhook above — Beehiiv *polls* an RSS feed this workflow serves, rather than pushing to it. Not an n8n credential; configured on Beehiiv's side.
+
+1. Copy the RSS Feed Server workflow's webhook URL after importing and activating (keep the path stable — see the workflow's own sticky note)
+2. In Beehiiv: **Settings → Integrations → RSS** → paste the URL
+
+---
+
+## Custom RSS Push Token
+
+Used by: StackSignal Manual RSS Push
+
+Not an n8n credential type — a bearer-style token you choose yourself, checked inline in a Code node.
+
+1. Generate any random string you'll treat as a secret (e.g. `openssl rand -hex 32`)
+2. In the workflow's **Validate & Prepare** node, replace `REPLACE_WITH_YOUR_API_TOKEN` with it
+3. Callers must send it as an `X-RSS-Token` header on every request
 
 ---
 

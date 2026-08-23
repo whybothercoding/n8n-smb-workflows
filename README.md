@@ -5,7 +5,7 @@
 [![CI](https://github.com/whybothercoding/n8n-smb-workflows/actions/workflows/ci.yml/badge.svg)](https://github.com/whybothercoding/n8n-smb-workflows/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![n8n](https://img.shields.io/badge/n8n-compatible-orange)](https://n8n.io)
-<!-- WORKFLOW_COUNT_BADGE:START -->[![Workflows: 12](https://img.shields.io/badge/workflows-12-blue)](#whats-inside)<!-- WORKFLOW_COUNT_BADGE:END -->
+<!-- WORKFLOW_COUNT_BADGE:START -->[![Workflows: 14](https://img.shields.io/badge/workflows-14-blue)](#whats-inside)<!-- WORKFLOW_COUNT_BADGE:END -->
 
 A curated library of production-ready n8n workflows covering the most common automation needs for small businesses: lead capture, email handling, social media, reporting, and more. Every workflow ships as a clean JSON export — import directly into any n8n instance, connect your credentials, and activate.
 
@@ -43,6 +43,8 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | 10 | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) | Reporting | Receives a contact/support form submission, creates a Baserow ticket row, posts an alert to Slack, generates an AI-suggested reply with GPT-4o, and saves the suggestion back to the ticket. |
 | 11 | [Error Handler](workflows/utilities/error-handler/) | Utilities | Centralized error handler for all other workflows in this library. When any workflow fails, n8n routes the error here and sends an alert email to the business owner. |
 | 12 | [StackSignal Weekly Draft Generator](workflows/newsletter/stacksignal-weekly-draft-generator/) | Newsletter | Every Sunday evening, pulls the week's top posts from five RSS feeds, has an AI agent curate and write editorial takes on the 3–5 most relevant items, and queues a pre-populated newsletter draft for a human to finish. |
+| 13 | [StackSignal RSS Feed Server](workflows/newsletter/stacksignal-rss-feed-server/) | Newsletter | Serves a live RSS feed of queued newsletter drafts over a webhook, so Beehiiv (or any RSS-polling tool) can pull drafts straight out of your Baserow content queue. |
+| 14 | [StackSignal Manual RSS Push](workflows/newsletter/stacksignal-manual-rss-push/) | Newsletter | A token-authenticated webhook for manually queuing a one-off newsletter draft — for when you want to publish something outside the automated weekly cycle. |
 <!-- WORKFLOWS_TABLE:END -->
 
 *(This table is generated — see [How This Repo Is Tested](#how-this-repo-is-tested). Don't hand-edit it.)*
@@ -66,6 +68,8 @@ All workflows ship as `active: false`. Import → connect credentials → activa
 | Route support tickets to Slack + AI draft replies | [Support Ticket to Slack](workflows/reporting/support-ticket-to-slack/) |
 | Get alerted when any workflow fails | [Error Handler](workflows/utilities/error-handler/) |
 | Auto-generate a curated weekly newsletter draft | [StackSignal Weekly Draft Generator](workflows/newsletter/stacksignal-weekly-draft-generator/) |
+| Turn a Baserow content queue into a pollable RSS feed | [StackSignal RSS Feed Server](workflows/newsletter/stacksignal-rss-feed-server/) |
+| Manually queue a one-off newsletter draft via API | [StackSignal Manual RSS Push](workflows/newsletter/stacksignal-manual-rss-push/) |
 <!-- WORKFLOW_PICKER:END -->
 
 ---
