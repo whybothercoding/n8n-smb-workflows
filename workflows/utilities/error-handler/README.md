@@ -6,7 +6,7 @@ Centralized error handler for all other workflows in this library. When any work
 
 ## Use Case
 
-Set this as the `errorWorkflow` in every other workflow's settings. Instead of silent failures, every error posts a Discord message with the workflow name, execution ID, failing node, and error message — giving you immediate visibility when something breaks.
+Set this as the `errorWorkflow` in every other workflow's settings. Instead of silent failures, every error posts a Discord message with the workflow name, the failing node (or a trigger-error marker if the workflow never actually started), the error message, and a link to the execution when one exists — giving you immediate visibility when something breaks.
 
 ## Required Credentials
 
@@ -17,7 +17,7 @@ Set this as the `errorWorkflow` in every other workflow's settings. Instead of s
 | Node | Type | Purpose |
 |------|------|---------|
 | Workflow Error Trigger | `n8n-nodes-base.errorTrigger` | Fires when any linked workflow encounters an error |
-| Format Error Message | `n8n-nodes-base.set` | Builds the subject and body from error context fields |
+| Format Error Message | `n8n-nodes-base.code` | Builds one Discord message from the error context — branches on whether the failure happened mid-execution (node + execution link) or at trigger time (no execution ever started) |
 | Send Error Alert | `n8n-nodes-base.discord` | Posts the formatted error alert to Discord via webhook |
 
 ## Flow Diagram
@@ -45,10 +45,11 @@ flowchart LR
 
 **When Invoice Reminder fails on the Baserow node:**
 
-> **Subject:** ⚠️ n8n workflow failed: Invoice Reminder
-> **Body:**
-> Workflow: Invoice Reminder
-> Execution ID: 8472
-> Error: Could not connect to Baserow — ECONNREFUSED
-> Node: Get Unpaid Invoices
-> Started: 2026-05-05T09:00:03.000Z
+```
+🔴 Invoice Reminder
+📍 Get Unpaid Invoices
+Could not connect to Baserow — ECONNREFUSED
+🔗 https://your-n8n.example.com/execution/workflow/3/8472
+```
+
+**When a workflow fails before it ever starts** (e.g. a misconfigured trigger), there's no node or execution link yet, so the marker line instead reads `⚡ trigger error (webhook)`.

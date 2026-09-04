@@ -136,7 +136,7 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-3.1-flash-lite",
+        "modelName": "models/gemini-3.5-flash",
         "options": {
           "maxOutputTokens": 2048,
           "temperature": 0.7
@@ -345,6 +345,6 @@
   "active": false,
   "settings": { "executionOrder": "v1", "errorWorkflow": "REPLACE_WITH_YOUR_ERROR_WORKFLOW_ID" },
   "staticData": null,
-  "tags": [{"name": "newsletter"}],
+  "tags": [{"name": "newsletter"}, {"name": "beehiiv"}],
   "versionId": "b1b2c3d4-0012-4abc-8def-000000000012"
 }

@@ -15,29 +15,13 @@
       "parameters": {}
     },
     {
-      "id": "node-011-set",
+      "id": "node-011-code",
       "name": "Format Error Message",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [460, 300],
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "assign-011-001",
-              "name": "subject",
-              "value": "=⚠️ n8n workflow failed: {{ $json.workflow.name }}",
-              "type": "string"
-            },
-            {
-              "id": "assign-011-002",
-              "name": "body",
-              "value": "=Workflow: {{ $json.workflow.name }}\nExecution ID: {{ $json.execution.id }}\nError: {{ $json.execution.error.message }}\nNode: {{ $json.execution.error.node?.name ?? 'unknown' }}\nStarted: {{ new Date($json.execution.startedAt).toISOString() }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "function esc(s) {\n  return String(s === undefined || s === null ? '' : s);\n}\n\nconst first = $input.first();\nconst e = (first && first.json) || {};\nconst workflowName = esc((e.workflow && e.workflow.name) || 'unknown workflow');\n\nlet msg, marker, url;\n\nif (e.execution && e.execution.error) {\n  const err = e.execution.error || {};\n  const rawMsg = String(err.message || 'unknown error');\n  const desc = String(err.description || '');\n  msg = rawMsg;\n  if (desc && desc !== rawMsg) msg += ' — ' + desc.split('\\n')[0].slice(0, 300);\n  marker = '📍 ' + esc(e.execution.lastNodeExecuted || 'unknown node');\n  url = e.execution.url || '';\n} else if (e.trigger && e.trigger.error) {\n  const err = e.trigger.error || {};\n  const rawMsg = String(err.message || 'unknown error');\n  const desc = String(err.description || '');\n  msg = rawMsg;\n  if (desc && desc !== rawMsg) msg += ' — ' + desc.split('\\n')[0].slice(0, 300);\n  marker = '⚡ trigger error' + (e.trigger.mode ? ' (' + esc(e.trigger.mode) + ')' : '');\n  url = '';\n} else {\n  msg = 'unknown error';\n  marker = '';\n  url = '';\n}\n\nconst lines = ['🔴 **' + workflowName + '**'];\nif (marker) lines.push(marker);\nlines.push(esc(msg.slice(0, 500)));\nif (url) lines.push('🔗 ' + url);\n\nreturn [{ json: { content: lines.join('\\n') } }];"
       }
     },
     {
@@ -49,7 +33,7 @@
       "parameters": {
         "authentication": "webhook",
         "operation": "sendLegacy",
-        "content": "={{ $json.subject }}\n\n{{ $json.body }}",
+        "content": "={{ $json.content }}",
         "options": {}
       },
       "credentials": {

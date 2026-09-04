@@ -10,6 +10,7 @@ The weekly draft generator runs on a schedule; sometimes you want to push a draf
 
 ## Required Credentials
 
+- **Header Auth Credential** — attached to the webhook itself; rejects requests missing a valid `X-RSS-Token` header before the workflow runs
 - **Baserow API Token** — write access to your content-queue table
 - **Discord Webhook** — post the confirmation message
 
@@ -17,8 +18,8 @@ The weekly draft generator runs on a schedule; sometimes you want to push a draf
 
 | Node | Type | Purpose |
 |------|------|---------|
-| Manual Push Webhook | `n8n-nodes-base.webhook` | Receives the POST |
-| Validate & Prepare | `n8n-nodes-base.code` | Checks the auth token, validates required fields, builds the row |
+| Manual Push Webhook | `n8n-nodes-base.webhook` | Receives the POST; a Header Auth credential enforces the `X-RSS-Token` check before anything else runs |
+| Validate & Prepare | `n8n-nodes-base.code` | Validates required fields and builds the row |
 | Valid Request? | `n8n-nodes-base.if` | Routes to insert (valid) or error response (invalid) |
 | Insert into RSS Items | `n8n-nodes-base.baserow` | Creates the queued draft row |
 | Discord Confirmation | `n8n-nodes-base.discord` | Posts a "draft queued" confirmation |
@@ -50,10 +51,10 @@ flowchart LR
 
 After importing:
 
-1. **Validate & Prepare** — replace `REPLACE_WITH_YOUR_API_TOKEN` with a token of your choosing; callers must send it as an `X-RSS-Token` header
+1. **Manual Push Webhook** — create a **Header Auth** credential (name it e.g. `X-RSS-Token`, value = a random secret of your choosing) and attach it to this node; callers must send that value as an `X-RSS-Token` header
 2. **Insert into RSS Items** — replace `REPLACE_WITH_YOUR_BASEROW_TABLE_ID` and each `REPLACE_WITH_YOUR_..._FIELD_ID` with your table's actual numeric field IDs (find them in the table's API docs panel)
 3. **Discord Confirmation** — create a webhook in your Discord server (**Server Settings → Integrations → Webhooks → New Webhook**) and use its URL for the credential
-4. Connect credentials: Baserow → "Baserow", Discord → "Discord Webhook"
+4. Connect credentials: Manual Push Webhook → "RSS Push Token" (Header Auth), Baserow → "Baserow", Discord → "Discord Webhook"
 
 ## Example
 
@@ -69,4 +70,4 @@ X-RSS-Token: your-token-here
 }
 ```
 
-**Result:** A new row is queued in the content table with `source = manual`, Discord receives a confirmation with the generated GUID, and the caller gets back `{"queued": true, "guid": "..."}`. A missing/wrong token returns 401; a missing `subject` or `body_html` returns 400.
+**Result:** A new row is queued in the content table with `source = manual`, Discord receives a confirmation with the generated GUID, and the caller gets back `{"queued": true, "guid": "..."}`. A missing/incorrect token is rejected by the webhook's Header Auth credential before the workflow runs; a missing `subject` or `body_html` returns 400.

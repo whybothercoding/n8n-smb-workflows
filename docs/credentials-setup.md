@@ -102,15 +102,16 @@ The opposite direction from the webhook above — Beehiiv *polls* an RSS feed th
 
 ---
 
-## Custom RSS Push Token
+## RSS Push Token (Header Auth)
 
 Used by: StackSignal Manual RSS Push
 
-Not an n8n credential type — a bearer-style token you choose yourself, checked inline in a Code node.
+An n8n **Header Auth** credential attached directly to the webhook node — it rejects an unauthorized request before the workflow even runs, so no token comparison lives in workflow code.
 
 1. Generate any random string you'll treat as a secret (e.g. `openssl rand -hex 32`)
-2. In the workflow's **Validate & Prepare** node, replace `REPLACE_WITH_YOUR_API_TOKEN` with it
-3. Callers must send it as an `X-RSS-Token` header on every request
+2. In n8n: **+ Add Credential** → search "Header Auth" → set **Name** to `X-RSS-Token` and **Value** to the string you generated
+3. Attach the credential to the **Manual Push Webhook** node's Authentication field
+4. Callers must send it as an `X-RSS-Token` header on every request
 
 ---
 
