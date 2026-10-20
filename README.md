@@ -7,7 +7,7 @@
 [![n8n](https://img.shields.io/badge/n8n-compatible-orange)](https://n8n.io)
 <!-- WORKFLOW_COUNT_BADGE:START -->[![Workflows: 14](https://img.shields.io/badge/workflows-14-blue)](#whats-inside)<!-- WORKFLOW_COUNT_BADGE:END -->
 
-A curated library of production-ready n8n workflows covering the most common automation needs for small businesses: lead capture, email handling, social media, reporting, and more. Every workflow ships as a clean JSON export — import directly into any n8n instance, connect your credentials, and activate.
+A curated library of production-ready n8n workflows covering the most common automation needs for small businesses: lead capture, email handling, social media, reporting, and more. Every workflow ships as a clean JSON export — import directly into any n8n instance, connect your credentials, and activate. Four of them (the three StackSignal newsletter workflows and the error handler) mirror workflows I run in production; the rest are templates, and CI imports every workflow into the current n8n on each push.
 
 ---
 
